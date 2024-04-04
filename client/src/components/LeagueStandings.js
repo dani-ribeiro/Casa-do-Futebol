@@ -4,9 +4,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/LeagueStandings.css';
 // Bootstrap Components -------------------------------------------------------
 import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
 import Table from 'react-bootstrap/Table';
 // ----------------------------------------------------------------------------
 
@@ -25,6 +22,10 @@ function LeagueStandings() {
                         'Ligue 1':        { id: 61, offset: -1 },
                         'Serie A':        { id: 135, offset: -1 }
                     }
+    
+    useEffect(() => {
+        fetchStandings(leagues[activeTab].id, currentSeason);
+    }, []);
 
     function handleTabClick(leagueName) {
         setActiveTab(leagueName);
@@ -46,27 +47,6 @@ function LeagueStandings() {
 
     return (
         <div className="leagueStandingsPage">
-            {/* Navbar */}
-            <Container fluid className='navBar'>
-                <Navbar className="bg-body-tertiary navBar">
-                    <Container fluid>
-                        <div className='navBrand'>
-                            <img src='/images/field.png' alt='Casa do Futebol' className='logo'></img>
-                            <Navbar.Brand className='siteBrand'>Casa do Futebol</Navbar.Brand>
-                        </div>
-                        <Nav className="navRight">
-                            <Nav.Link>Leaderboard</Nav.Link>
-                            <NavDropdown title="username" className="basic-nav-dropdown">
-                                <NavDropdown.Item>Sign Up</NavDropdown.Item>
-                                <NavDropdown.Item>Sign In</NavDropdown.Item>
-                                <NavDropdown.Item>Change Username</NavDropdown.Item>
-                            </NavDropdown>
-                            <img src='/images/default-user.svg' alt='User' className='profilePicture'></img>
-                        </Nav>
-                    </Container>
-                </Navbar>
-            </Container>
-
             <Container fluid id='leagueStandings-background'>
                 <div id='leagueStandings'>
                     <h3 id='standingText'>Standings</h3>
