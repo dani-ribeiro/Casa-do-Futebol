@@ -7,7 +7,12 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 // ----------------------------------------------------------------------------
 
-function NavBarTOP() {
+function NavBarTOP({ setCurrentView }) {
+
+    const navigatePage = (page) => {
+        setCurrentView(page);
+    };
+
     return (
         <Container fluid className='navBar'>
             <Navbar className="bg-body-tertiary navBar">
@@ -19,7 +24,7 @@ function NavBarTOP() {
                     <Nav className="navRight">
                         <Nav.Link>Leaderboard</Nav.Link>
                         <NavDropdown title="username" className="basic-nav-dropdown">
-                            <NavDropdown.Item>Sign Up</NavDropdown.Item>
+                            <NavDropdown.Item onClick={() => navigatePage('Sign Up')}>Sign Up</NavDropdown.Item>
                             <NavDropdown.Item>Sign In</NavDropdown.Item>
                             <NavDropdown.Item>Change Username</NavDropdown.Item>
                         </NavDropdown>

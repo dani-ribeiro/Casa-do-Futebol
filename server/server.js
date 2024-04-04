@@ -3,6 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
 const apicache = require('apicache');
 const cache = apicache.middleware;
 
@@ -22,8 +25,6 @@ const options = {
     },
 };
 
-// rather than doing /api route --> do /(whatever endpoint)?(variable1=value1)&(...)
-// that way I can parse it here and fetch it with the values!!!!
 app.get('/api/standings/:leagueID/:seasonYEAR', cache('24 hours'), (req, res) => {
     const { leagueID, seasonYEAR } = req.params;
     fetch(`https://v3.football.api-sports.io/standings?league=${leagueID}&season=${seasonYEAR}`, options)
@@ -83,6 +84,23 @@ app.get('/api/standings/:leagueID/:seasonYEAR', cache('24 hours'), (req, res) =>
     })
     .catch(error => console.error(error));
 });
+
+app.post('/backend/signup', (req, res) => {
+    const { username, password } = req.body;
+
+    const validInputPattern = /^[A-Za-z0-9]+$/;
+
+    if(!username || !password){
+        res.json({  success: false,
+                    error: 'Empty'});
+    }else if(username.length > 36 || !validInputPattern.test(username) || !validInputPattern.test(password)){
+        res.json({  success: false,
+                    error: 'Invalid' });
+    }else{
+        console.log(username, password);
+        res.json( {success: true, username, password});
+    }
+  });
 
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
