@@ -1,0 +1,140 @@
+.leagueStandingsPage {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container-fluid {
+    padding: 0;
+}
+
+.navBrand {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-left: 40px;
+}
+
+.siteBrand {
+    padding: 0;
+    font-size: 20px;
+}
+
+.logo {
+    width: 40px;
+    transform: rotate(90deg);
+    margin-right: 20px;
+}
+
+.navRight {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-right: 50px;
+}
+
+.profilePicture {
+    border-radius: 50%;
+    border: 1px solid black;
+}
+
+#leagueStandings-background {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1; /* fill remaining space */
+
+}
+
+#leagueStandings {
+    border: 2px solid black;
+    border-radius: 10px;
+    height: 500px;
+    width: 75%;
+    text-align: center;
+}
+
+#standingText {
+    margin: 20px 0;
+}
+
+#leagueHolder {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.activeLeague {
+    background-color: black;
+    color: white;
+}
+
+.league {
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+}
+
+.table-responsive {
+    max-height: 370px;
+    overflow-y: auto;
+}
+
+.table-container {
+    max-height: fit-content;
+    overflow-y: auto;
+    position: relative;
+}
+
+.table-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+#leagueTable tbody {
+    overflow-y: auto;
+}
+
+#leagueTable .table-position {
+    width: 8%;
+}
+
+#leagueTable .table-team {
+    text-align: left;
+    width: 25%;
+}
+
+#leagueTable .table-stat {
+    width: 5%;
+}
+
+#leagueTable .table-form {
+    width: 17%;
+}
+
+.formLetter {
+    color: transparent;
+    border-radius: 50%;
+    letter-spacing: 7px;
+    line-height: 1px;
+    margin: 0 1px;
+}
+
+.formLetter.win {
+    background-color: green;
+}
+
+.formLetter.lose {
+    background-color: red;
+}
+
+.formLetter.draw {
+    background-color: gray;
+}
