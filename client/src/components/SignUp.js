@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/SignUp.css';
-// Bootstrap Components -------------------------------------------------------
-import Container from 'react-bootstrap/Container';
-// ----------------------------------------------------------------------------
+import './styles/signupLogin.css';
 
-function SignUp({ setCurrentView }) {
+function SignUp({ setCurrentView, setLoggedIn }) {
     const [signUpWarning, setSignUpWarning] = useState('');
 
+    // handles sign up form submission
     function signup(event) {
         const username = document.getElementById("signup-username").value;
         const password = document.getElementById("signup-password").value;
@@ -30,17 +28,16 @@ function SignUp({ setCurrentView }) {
                 }
             })
             .then(data => {
-                console.log(data);
                 if(data.success){
-                    // set current view back to league standings
-                    console.log('success');
-                    setCurrentView('League Standings');
+                    sessionStorage.setItem('token', data.token);
+                    setLoggedIn( { status: true, username });
+                    setCurrentView( {page: 'League Standings', data: null} );
                 }else if(data.error === 'Username Exists'){     // if username already exists --> return warning message and allow user to try again
-                    setSignUpWarning(`Username ${data.attemptedUsername} already exists. Please try again.`);
+                    setSignUpWarning(`Username ${data.username} already exists. Please try again.`);
                 }else if(data.error === 'Invalid'){
                     setSignUpWarning('Invalid Username or Password. Please try again.');
-                }else{      // query prep failed or DB connection failed --> start over
-                    setCurrentView('League Standings');
+                }else{  // DB connection failed
+                    setCurrentView( {page: 'League Standings', data: null} );
                 }
             })
             .catch(err => console.error(err));
@@ -48,14 +45,14 @@ function SignUp({ setCurrentView }) {
     }
 
     return (
-        <div id="page3-signup">
+        <div id="page2-signup">
             <div className="container-fluid page">
                 <div className="page2body">
                     <div className="left-nav"></div>
                     <div className="right-nav">
                         {/* <!-- warning --> */}
                         {signUpWarning && (
-                            <div id="warning-signup">
+                            <div id="warning-signup" className='warning'>
                                 <h3>{signUpWarning}</h3>
                             </div>
                         )}

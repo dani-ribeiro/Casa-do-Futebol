@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/LeagueStandings.css';
@@ -7,30 +7,40 @@ import Container from 'react-bootstrap/Container';
 import Table from 'react-bootstrap/Table';
 // ----------------------------------------------------------------------------
 
-function LeagueStandings() {
+function LeagueStandings({setCurrentView}) {
     const currentYear = new Date().getFullYear();
-    let currentSeason = currentYear;  // default
 
+    const [currentSeason, setCurrentSeason] = useState(currentYear); // default
     const [activeTab, setActiveTab] = useState('Brasileirão');
     const [standings, setStandings] = useState({});
 
     // maps <League Name, { League ID, Season Offset }>             season offset: accounts for leagues starting earlier/later than others 
-    const leagues = {   'Brasileirão' :   { id: 71, offset: 0 },
-                        'Bundesliga':     { id: 78, offset: -1 },
-                        'EPL':            { id: 39, offset: -1 },
-                        'La Liga':        { id: 140, offset: -1 },
-                        'Ligue 1':        { id: 61, offset: -1 },
-                        'Serie A':        { id: 135, offset: -1 }
-                    }
+    const leagues = useMemo(() => ({
+        'Brasileirão': { id: 71, offset: 0 },
+        'Bundesliga': { id: 78, offset: -1 },
+        'EPL': { id: 39, offset: -1 },
+        'La Liga': { id: 140, offset: -1 },
+        'Ligue 1': { id: 61, offset: -1 },
+        'Serie A': { id: 135, offset: -1 }
+    }), []);
     
     useEffect(() => {
         fetchStandings(leagues[activeTab].id, currentSeason);
-    }, []);
+    }, [currentSeason, activeTab, leagues]);
 
     function handleTabClick(leagueName) {
         setActiveTab(leagueName);
-        currentSeason = currentYear + leagues[leagueName].offset;
+        setCurrentSeason(currentYear + leagues[leagueName].offset);
         fetchStandings(leagues[leagueName].id, currentSeason);
+    }
+
+    function handleTeamClick(teamID){
+        // Here you would ideally fetch the team ID from your API using the teamName
+        setCurrentView({ page: 'Team', data: {
+                                                leagueID: leagues[activeTab].id,
+                                                teamID: teamID,
+                                                season: currentSeason,
+                                            } });
     }
 
     function fetchStandings(leagueID, seasonYEAR){
@@ -86,7 +96,7 @@ function LeagueStandings() {
                                     Object.keys(standings)
                                     .sort((team1, team2) => standings[team1].rank - standings[team2].rank)
                                     .map((teamName, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} onClick={() => handleTeamClick(standings[teamName].team_id)}>
                                         <td className='table-position'>{standings[teamName].rank}</td>
                                         <td className='table-team'>{teamName}</td>
                                         <td className='table-stat'>{standings[teamName].matches_played}</td>

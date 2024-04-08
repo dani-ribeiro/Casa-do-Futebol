@@ -30,10 +30,16 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    margin-right: 50px;
+    margin-right: 30px;
 }
 
 .profilePicture {
     border-radius: 50%;
     border: 1px solid black;
+}
+
+.dropdown-menu[data-bs-popper] {
+    top: 100%;
+    margin-top: var(--bs-dropdown-spacer);
+    left: -65px;
 }

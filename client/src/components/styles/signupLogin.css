@@ -1,0 +1,92 @@
+#page2-signup .container-fluid.page,
+#page3-login .container-fluid.page {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+}
+
+#page2-signup .page2body,
+#page3-login .page2body {
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 68px);
+}
+
+#page2-signup .left-nav,
+#page3-login .left-nav {
+    width: 50vw;
+    height: 100%;
+    border-right: 3px solid black;
+    background-image: url('https://pikwizard.com/pw/medium/91d26e0e14af8e23355996d90a04bd31.jpg');
+    background-size: cover;
+}
+
+#page2-signup .right-nav,
+#page3-login .right-nav {
+    width: 50vw;
+}
+
+#page2-signup .right-nav > .login,
+#page3-login .right-nav > .login {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 70%;
+    padding: 5vw;
+}
+
+#page2-signup form > *,
+#page3-login form > * {
+    display: flex;
+    flex-direction: column;
+}
+
+#page2-signup form > label,
+#page3-login form > label {
+    margin: 20px 0 0 0;
+}
+
+#page2-signup form > button,
+#page3-login form > button {
+    border-radius: 10px;
+    width: 100%;
+    height: 30px;
+    margin: 20px 0;
+    background-color: rgb(72, 72, 72);
+    color: rgb(189, 189, 189);
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+#page2-signup a,
+#page3-login a {
+    text-decoration: none;
+    color: black;
+}
+
+#page2-signup #back,
+#page3-login #back {
+    display: flex;
+    text-decoration: none;
+    text-align: center;
+    margin: 0 20px 0 0;
+    border-radius: 10%;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 8px 20px;
+    background-color: rgb(239, 239, 239);
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13.333px;
+}
+
+.warning {
+    margin-top: 20px;
+    text-align: center;
+    color: rgb(128, 18, 18);
+    font-style: italic;
+    font-weight: normal;
+    width: 35vw;
+}

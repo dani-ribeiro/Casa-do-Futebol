@@ -1,0 +1,19 @@
+.teamPage-playerBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.teamPage-playerImg {
+    border-radius: 50%;
+    border: 2px solid black;
+    width: 75px;
+    height: 75px;
+}
+
+.teamPage-playerName {
+    margin: 10px 0 0 0;
+    font-size: 18px;
+}

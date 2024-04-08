@@ -1,0 +1,161 @@
+#teamPage {
+    width: 100vw;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#team-background {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 90%;
+    border: 2px solid gray;
+    margin: 40px;
+}
+
+#teamPage-left {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+}
+
+#teamPage-basicHolder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#teamPage-teamInfo {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.teamPage-team-information {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.teamPage-teamLogo {
+    width: 150px;
+    margin: 30px 0 10px 0;
+}
+
+#teamPage-league {
+    font-style: italic;
+}
+
+#teamPage-statsTable {
+    width: 40%;
+}
+
+
+#teamPage-statsHolder {
+    border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#teamPage-stats {
+    width: 70%;
+}
+
+#teamPage-stats td {
+    text-align: center;
+}
+
+#teamPage-totalCards {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-left: 15px;
+}
+
+.teamPage-cards {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    width: fit-content;
+}
+
+.teamPage-cardImg {
+    width: 15px;
+}
+
+.teamPage-cardCount {
+    margin: 0 20px 0 5px;
+}
+
+#teamPage-playersSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#teamPage-playersContainer {
+    display: flex;
+    width: 90%;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+#teamPage-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-left: 2px solid gray;
+}
+
+.teamPage-matchesHeader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+    border: 2px solid black;
+    
+}
+
+#teamPage-upcomingMatches-section,
+#teamPage-previousMatches-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#teamPage-upcomingMatches {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: scroll;
+    max-height: 407px;
+}
+
+#teamPage-previousMatches {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: scroll;
+    max-height: 407px;
+}
