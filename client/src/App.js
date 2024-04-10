@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import NavBarTOP from './components/NavBarTOP.js';
@@ -7,15 +7,26 @@ import SignUp from './components/SignUp.js';
 import Login from './components/Login.js';
 import LeagueStandings from './components/LeagueStandings.js';
 import Team from './components/Team.js';
+import PlayerPage from './components/PlayerPage.js';
+import Game from './components/Game.js';
 
 // Bootstrap Components -------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 
 function App() {
-  const [currentView, setCurrentView] = useState( {page: 'League Standings', data: null} );
+  const [currentView, setCurrentView] = useState( {page: 'Game', data: null} );
   const [loggedIn, setLoggedIn] = useState( {status: false, username: ''});
   const [showChangeModal, setShowChangeModal] = useState(false);
+
+  // checks if user is logged in (maintains log in after refresh)
+  useEffect(() => {
+    const token = sessionStorage.getItem('token');
+    const username = sessionStorage.getItem('username');
+    if (token) {
+        setLoggedIn({ status: true, username });
+    }
+}, []);
 
   return (
     <div className="App">
@@ -24,10 +35,10 @@ function App() {
         { currentView.page === 'League Standings' ? (<LeagueStandings setCurrentView={setCurrentView} />) : 
           currentView.page === 'Sign Up' ? ( <SignUp setCurrentView={setCurrentView} setLoggedIn={setLoggedIn} />) :
           currentView.page === 'Log In' ? ( <Login setCurrentView={setCurrentView} setLoggedIn={setLoggedIn} />):
-          // temporary
-          currentView.page === 'Team' ? (
-             <Team setCurrentView={setCurrentView} teamData={currentView.data} />
-             )
+          currentView.page === 'Team' ? (<Team setCurrentView={setCurrentView} teamData={currentView.data} />):
+          currentView.page === 'Player' ? (<PlayerPage setCurrentView={setCurrentView} playerData={currentView.data.playerData} season={currentView.data.season} teamLogo={currentView.data.teamLogo} />):
+          currentView.page === 'Game' ? (<Game setCurrentView={setCurrentView} />)
+
           
           : null
 

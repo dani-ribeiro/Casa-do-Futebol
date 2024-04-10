@@ -25,6 +25,11 @@ const options = {
     },
 };
 
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    next();
+  });
+
 app.get('/api/standings/:leagueID/:seasonYEAR', cache('24 hours'), (req, res) => {
     const { leagueID, seasonYEAR } = req.params;
     fetch(`https://v3.football.api-sports.io/standings?league=${leagueID}&season=${seasonYEAR}`, options)
@@ -216,9 +221,9 @@ app.post('/backend/signup', async (req, res) => {
                     const avgAgainstGoals = parseFloat(team.goals.against.average.total) || 0;
                     const averageGoals = ((avgForGoals + avgAgainstGoals) / 2).toFixed(1);
 
-                    // assign best win/best loss regardless of whether the game was home/away --> initialize with home best game
-                    let bestWin = team.biggest.wins.home || '';
-                    let worstLoss = team.biggest.loses.home || '';
+                    // assign best win/best loss regardless of whether the game was home/away
+                    let bestWin = '0-0' || '';
+                    let worstLoss = '0-0' || '';
                     // set biggest win
                     if(team.biggest.wins.away) {
                         const awayWinGoals = team.biggest.wins.away.split('-').reduce((total, num) => total + parseInt(num), 0);
@@ -330,7 +335,8 @@ app.post('/backend/signup', async (req, res) => {
 
                 for(const currentPlayer of playersData){
                     players[currentPlayer.name] =  {
-                                                    player_id: currentPlayer.id,
+                                                    player_id:  currentPlayer.id,
+                                                    name:       currentPlayer.name,
                                                     age:        currentPlayer.age,
                                                     number:     currentPlayer.number,
                                                     position:   currentPlayer.position,
@@ -342,6 +348,278 @@ app.post('/backend/signup', async (req, res) => {
             }else{
                 // data not available
                 res.json({});
+            }
+        })
+        .catch(error => console.error(error));
+    });
+
+    // fetches advanced player information
+    app.get('/api/player/:playerID/:seasonYEAR', cache('24 hours'), (req, res) => {
+        const { playerID, seasonYEAR } = req.params;
+
+        fetch(`https://v3.football.api-sports.io/players?id=${playerID}&season=${seasonYEAR}`, options)
+        .then(response => {
+            if(!response.ok){
+                throw new Error("ERROR: Bad Response");
+            }else{
+                return response.json();
+            }
+        })
+        .then(data => {
+            // parse the response and send ONLY relevant data to client
+            const player_data = data.response[0];
+            if(player_data){
+                const player = player_data.player;
+                const statistics = player_data.statistics;
+                if(player && statistics){
+                    const playerInfo = {};      // dictionary mapping <Player, Player Information>
+
+                    /* Player ID (int): maps to     {   nationality
+                                                        firstName,
+                                                        lastName,
+                                                        height          Player's height (cm),
+                                                        weight          Player's weight (kg),
+                                                        captain         Whether player is captain or not
+
+                                                        The below statistics are summed across all leagues/tournaments, and divided by position
+                                                        all_positions   {
+                                                                            appearances    Total # of appearances,
+                                                                            minutes        Total # of minutes played,
+                                                                            rating         Average performance of player (1-10),
+                                                                            totalPasses,
+                                                                            keyPasses,
+                                                                            passAccuracy,
+                                                                            foulsDrawn      Total # of fouls drawn by other players,
+                                                                            foulsCommitted  Total # of fouls committed to other players,
+                                                                            yellowCards     Total # of yellow cards,
+                                                                            redCards        Total # of red cards (including yellow --> red),
+                                                                            duelsWon        Fraction representing (number of duels won)/total duels
+                                                                        },
+                                                                        
+                                                        goalkeeper      {
+                                                                            conceded,
+                                                                            saved,
+                                                                            penalty_committed      Total # of penalties given away,
+                                                                            penalty_saved          Total # of penalties saved
+                                                                        },
+
+                                                        defender        {
+                                                                            goals,
+                                                                            conceded,
+                                                                            assists,
+                                                                            tackles,
+                                                                            penalty_committed      Total # of penalties given away,
+                                                                            penalties_converted       Fraction representing (number of penalties scored)/total penalties taken        
+                                                                        },
+
+                                                        midfielder      {
+                                                                            goals,
+                                                                            conceded,
+                                                                            assists,
+                                                                            shots                       Fraction representing (total shots on target)/total shots,
+                                                                            dribbles                    Fraction representing (total successful dribbles)/total dribbles attempted,
+                                                                            penalty_committed           Total # of penalties given away,
+                                                                            penalty_drawn               Total # of penalties awarded
+                                                                            penalties_converted         Fraction representing (number of penalties scored)/total penalties taken  
+                                                                        },
+
+                                                        attacker        {
+                                                                            goals,
+                                                                            assists,
+                                                                            shots                       Fraction representing (total shots on target)/total shots,
+                                                                            dribbles                    Fraction representing (total successful dribbles)/total dribbles attempted,
+                                                                            penalty_drawn               Total # of penalties awarded,
+                                                                            penalties_converted         Fraction representing (number of penalties scored)/total penalties taken  
+                                                                        }
+                                                    }
+            //     */
+                    playerInfo.nationality = player.nationality;
+                    playerInfo.firstName = player.firstname;
+                    playerInfo.lastName = player.lastname;
+                    playerInfo.height = player.height;
+                    playerInfo.weight = player.weight;
+                    playerInfo.captain = statistics[0].games.captain;
+                    playerInfo.team = statistics[0].team.name;
+                    playerInfo.position = statistics[0].games.position;
+                    playerInfo.birthday = new Date(player.birth.date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    });
+
+                    let all_positions = {
+                                            appearances:    0,
+                                            minutes:        0,
+                                            rating:         0,         
+                                            totalPasses:    0,
+                                            keyPasses:      0,
+                                            passAccuracy:   0,
+                                            foulsDrawn:     0,
+                                            foulsCommitted: 0,
+                                            yellowCards:    0,     
+                                            redCards:       0,
+                                            duelsWon:       0,
+                                            totalDuels:     0        
+                                        }
+                    let goalkeeper = {
+                                        conceded:           0,
+                                        saved:              0,
+                                        penalty_comitted:   0,         
+                                        penalty_saved:      0,     
+                                    }
+
+                    let defender = {
+                                        goals:                  0,
+                                        conceded:               0,
+                                        assists:                0,         
+                                        tackles:                0, 
+                                        penalty_committed:      0,
+                                        penalties_converted:    0,
+                                        penalties_total:         0    
+                                    }
+
+                    let midfielder = {
+                                        goals:                  0,
+                                        conceded:               0,
+                                        assists:                0,
+                                        shots:                  0,
+                                        total_shots:            0,
+                                        dribbles:               0,
+                                        total_dribbles:         0,
+                                        penalty_committed:      0,
+                                        penalty_drawn:          0,
+                                        penalties_converted:    0,
+                                        penalties_total:         0    
+                    }
+
+                    let attacker = {
+                                    goals:                  0,
+                                    assists:                0,
+                                    shots:                  0,
+                                    total_shots:            0,
+                                    dribbles:               0,
+                                    total_dribbles:         0,
+                                    penalty_drawn:          0,
+                                    penalties_converted:    0,
+                                    penalties_total:         0    
+                                }
+
+
+                    let leagueCount = 0;
+                    statistics.forEach(leagueStats => {
+                        if(leagueStats.games.rating !== null){
+                            leagueCount += 1;
+                        }
+                        // all_positions statistics
+                        all_positions.appearances += leagueStats.games.appearences || 0;
+                        all_positions.minutes += leagueStats.games.minutes || 0;
+                        all_positions.rating += parseFloat(leagueStats.games.rating) || 0;            // averaged
+                        all_positions.totalPasses += leagueStats.passes.total || 0;
+                        all_positions.keyPasses += leagueStats.passes.key || 0;
+                        all_positions.passAccuracy += leagueStats.passes.accuracy || 0;   // averaged
+                        all_positions.foulsDrawn += leagueStats.fouls.drawn || 0;
+                        all_positions.foulsCommitted += leagueStats.fouls.committed || 0;
+                        all_positions.yellowCards += leagueStats.cards.yellow || 0;
+                        all_positions.redCards += (leagueStats.cards.red || 0) + (leagueStats.cards.yellowred || 0);
+                        all_positions.duelsWon += leagueStats.duels.won || 0;
+                        all_positions.totalDuels += leagueStats.duels.total || 0;
+
+                        // goalkeeper statistics
+                        goalkeeper.conceded += leagueStats.goals.conceded || 0;
+                        goalkeeper.saved += leagueStats.goals.saves || 0;
+                        goalkeeper.penalty_comitted += leagueStats.penalty.committed || 0;
+                        goalkeeper.penalty_saved += leagueStats.penalty.saved || 0;
+
+                        // defender statistics
+                        defender.goals += leagueStats.goals.total || 0;
+                        defender.conceded += leagueStats.goals.conceded || 0;
+                        defender.assists += leagueStats.goals.assists || 0;
+                        defender.tackles += leagueStats.tackles.total || 0;
+                        defender.penalty_committed += leagueStats.penalty.committed || 0;
+                        defender.penalties_converted += leagueStats.penalty.scored || 0;
+                        defender.penalties_total += (leagueStats.penalty.missed || 0) + defender.penalties_converted;
+                        
+                        // midfielder statistics
+                        midfielder.goals += leagueStats.goals.total || 0;
+                        midfielder.conceded += leagueStats.goals.conceded || 0;
+                        midfielder.assists += leagueStats.goals.assists || 0;
+                        midfielder.shots += leagueStats.shots.on || 0;
+                        midfielder.total_shots += leagueStats.shots.total || 0;
+                        midfielder.dribbles += leagueStats.dribbles.success || 0;
+                        midfielder.total_dribbles += leagueStats.dribbles.attempts || 0;
+                        midfielder.penalty_committed += leagueStats.penalty.committed || 0;
+                        midfielder.penalty_drawn += leagueStats.penalty.won || 0;
+                        midfielder.penalties_converted += leagueStats.penalty.scored || 0;
+                        midfielder.penalties_total += (leagueStats.penalty.missed || 0) + midfielder.penalties_converted;
+
+                        // attacker statistics
+                        attacker.goals += leagueStats.goals.total || 0;
+                        attacker.assists += leagueStats.goals.assists || 0;
+                        attacker.shots += leagueStats.shots.on || 0;
+                        attacker.total_shots += leagueStats.shots.total || 0;
+                        attacker.dribbles += leagueStats.dribbles.success || 0;
+                        attacker.total_dribbles += leagueStats.dribbles.attempts || 0;
+                        attacker.penalty_drawn += leagueStats.penalty.won || 0;
+                        attacker.penalties_converted += leagueStats.penalty.scored || 0;
+                        attacker.penalties_total += (leagueStats.penalty.missed || 0) + attacker.penalties_converted;
+                    });  
+                    
+                    // average any stats that need averaging
+                    if(leagueCount > 0){
+                        all_positions.rating /= leagueCount;
+                        all_positions.rating = +all_positions.rating.toFixed(2);
+
+                        all_positions.passAccuracy /= leagueCount;
+                        all_positions.passAccuracy = +all_positions.passAccuracy.toFixed(2);
+                    }
+
+                    // create fractional strings for the relevant stats
+                    if(all_positions.totalDuels > 0){
+                        all_positions.duelsWon = `${all_positions.duelsWon}/${all_positions.totalDuels}`
+                    }else{
+                        all_positions.duelsWon = 0;
+                    }
+
+                    if(midfielder.total_dribbles > 0){
+                        const dribblesString = `${midfielder.dribbles}/${midfielder.total_dribbles}`;
+                        midfielder.dribbles = dribblesString;
+                        attacker.dribbles = dribblesString;
+                    }else{
+                        midfielder.dribbles = 0;
+                        attacker.dribbles = 0;
+                    }
+
+                    if(midfielder.total_shots > 0){
+                        const shotsString = `${midfielder.shots}/${midfielder.total_shots}`;
+                        midfielder.shots = shotsString;
+                        attacker.shots = shotsString;
+                    }else{
+                        midfielder.shots = 0;
+                        attacker.shots = 0;
+                    }
+
+                    if(defender.penalties_total > 0){
+                        const penaltyString = `${defender.penalties_converted}/${defender.penalties_total}`;
+                        defender.penalties_converted = penaltyString;
+                        midfielder.penalties_converted = penaltyString;
+                        attacker.penalties_converted = penaltyString;
+                    }else{
+                        defender.penalties_converted = 0;
+                        midfielder.penalties_converted = 0;
+                        attacker.penalties_converted = 0;
+                    }
+
+                    playerInfo.all_positions = all_positions;
+                    playerInfo.goalkeeper = goalkeeper;
+                    playerInfo.defender = defender;
+                    playerInfo.midfielder = midfielder;
+                    playerInfo.attacker = attacker;
+                    
+                    res.json(playerInfo);
+                }else{
+                    // data not available
+                    res.json({});
+                }
             }
         })
         .catch(error => console.error(error));
@@ -438,6 +716,43 @@ app.post('/backend/signup', async (req, res) => {
         .catch(error => console.error(error));
     });
 
+    // fetches team logo
+    app.get('/api/team-logo/:teamId', async (req, res) => {
+        const { teamId } = req.params;
+        try {
+            const response = await fetch(`https://media.api-sports.io/football/teams/${teamId}.png`);
+            if (!response.ok) {
+                throw new Error('ERROR: Unable to fetch team logo');
+            }
+
+            const arrayBuffer = await response.arrayBuffer();
+            const logoBuffer = Buffer.from(arrayBuffer);
+
+            res.setHeader('Content-Type', 'image/png');
+            res.send(logoBuffer);
+        } catch (error) {
+            console.error('Error fetching team logo:', error);
+        }
+    });
+
+    // fetches player picture
+    app.get('/api/player-picture/:playerID', async (req, res) => {
+        const { playerID } = req.params;
+        try {
+            const response = await fetch(`https://media.api-sports.io/football/players/${playerID}.png`);
+            if (!response.ok) {
+                throw new Error('ERROR: Unable to fetch team logo');
+            }
+
+            const arrayBuffer = await response.arrayBuffer();
+            const logoBuffer = Buffer.from(arrayBuffer);
+
+            res.setHeader('Content-Type', 'image/png');
+            res.send(logoBuffer);
+        } catch (error) {
+            console.error('Error fetching team logo:', error);
+        }
+    });
 
 mongoose.connect(`${process.env.DB_CONNECTION}`)
 .then(() => {

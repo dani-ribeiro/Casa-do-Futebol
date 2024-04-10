@@ -35,7 +35,6 @@ function LeagueStandings({setCurrentView}) {
     }
 
     function handleTeamClick(teamID){
-        // Here you would ideally fetch the team ID from your API using the teamName
         setCurrentView({ page: 'Team', data: {
                                                 leagueID: leagues[activeTab].id,
                                                 teamID: teamID,

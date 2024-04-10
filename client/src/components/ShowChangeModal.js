@@ -37,6 +37,7 @@ function ShowChangeModal( { showChangeModal, setShowChangeModal, loggedIn, setLo
             .then(data => {
                 if(data.success){
                     sessionStorage.setItem('token', data.token);
+                    sessionStorage.setItem('username', username);
                     setLoggedIn( { status: true, username: data.username });
                     handleClose();
                 }else if(data.error === 'Username Exists'){     // if username already exists --> return warning message and allow user to try again

@@ -2,18 +2,16 @@ import React, { useState } from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/smallMatch.css';
+import LoadImage from './LoadImage.js';
 // Bootstrap Components -------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 
 function SmallMatch( {matchID, matchData} ){
-    console.log(matchData);
-    
-
     return (
         <div className='small-match'>
             <div className='small-match-team'>
-                <img src={matchData.home_logo}  className='small-match-teamLogo' alt='Team Crest'/>
+                <LoadImage src={matchData.home_logo} alt={matchData.home_team} className={'small-match-teamLogo'} id={''}/>
                 <p>{matchData.home_team}</p>
             </div>
             {matchData.status === 'FT' ? (
@@ -35,7 +33,7 @@ function SmallMatch( {matchID, matchData} ){
                 </>
             ): null}
             <div className='small-match-team'>
-                <img src={matchData.away_logo}  className='small-match-teamLogo' alt='Team Crest'/>
+                <LoadImage src={matchData.away_logo} alt={matchData.away_team} className={'small-match-teamLogo'} id={''}/>
                 <p>{matchData.away_team}</p>
             </div>
         </div>

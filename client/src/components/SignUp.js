@@ -30,6 +30,7 @@ function SignUp({ setCurrentView, setLoggedIn }) {
             .then(data => {
                 if(data.success){
                     sessionStorage.setItem('token', data.token);
+                    sessionStorage.setItem('username', username);
                     setLoggedIn( { status: true, username });
                     setCurrentView( {page: 'League Standings', data: null} );
                 }else if(data.error === 'Username Exists'){     // if username already exists --> return warning message and allow user to try again

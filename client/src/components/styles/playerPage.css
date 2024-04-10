@@ -1,0 +1,281 @@
+#playerPage {
+    display: flex;
+    width: 100vw;
+    height:calc(100% - 68px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#playerPage-contentHolder { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    
+}
+
+#playerPage-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+}
+
+#playerPage-topLeft {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+#playerPage-playerImage {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 2px solid black;
+}
+
+#playerPage-lastName {
+    font-weight: bold;
+}
+
+#playerPage-playerMid {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100%;
+    padding: 20px;
+}
+
+#playerPage-smallInfo {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.playerPage-smallLogo {
+    width: 40px;
+    height: 40px;
+}
+
+#playerPage-team > p {
+    margin: 0;
+}
+
+#playerPage-midInfo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#playerPage-midInfo > p {
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+.playerPage-dot {
+    height: 25px;
+    margin: 0 10px;
+    color: gray;
+}
+
+#playerPage-team, #playerPage-captain {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#playerPage-topRight {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    height: 70%;
+    width: fit-content;
+    border-left: 1px solid gray;
+}
+
+#playerPage-playerPersonal-table {
+    margin-left: 10px;
+}
+
+#playerPage-playerPersonal-table th, 
+#playerPage-playerPersonal-table td {
+    padding: 5px;
+}
+
+#playerPage-playerPersonal-table td {
+    font-style: italic;
+}
+
+#playerPage hr {
+    border: 1px solid black;
+    width: 60%;
+}
+
+#playerPage-bottom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+#playerPage-statsHolder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px 50px;
+}
+
+#playerPage-statsTitle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#playerPage-statsTitle hr {
+    width: 20%;
+    margin: 10px;
+}
+
+#playerPage-statsTitle h2 {
+    margin: 0;
+}
+
+#playerPage-statsBackground {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    height: 100%;
+}
+
+.playerPage-statTop {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.playerPage-statsBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid gainsboro;
+    border-radius: 8%;
+    width: 100%;
+}
+
+.playerPage-statTable {
+    width: 100%;
+}
+
+.playerPage-statTable tr {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    padding: 5px;
+
+}
+
+.playerPage-statTable td {
+    display: flex;
+    align-items: center;
+    width: 40%;
+    height: 100%;
+    text-align: left;
+    font-weight: bold;
+}
+
+.playerPage-statTable th {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 30%;
+    font-weight: bold;
+    margin-right: 30px;
+}
+
+.playerPage-stat {
+    border: 2px solid black !important;
+    border-radius: 8px;
+    text-align: center;
+    width: min-content;
+    padding: 10px;
+    margin: 0;
+}
+
+.playerPage-totalCards {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 60%;
+}
+
+.playerPage-cards {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+.playerPage-cardCount {
+    margin: 0;
+}
+
+#playerPage-statsRight {
+    margin-left: 40px;
+}
+
+.playerPage-positionTop {
+    height: 129px;
+}
+
+#playerPage-statTop-general {
+    padding-top: 30px;
+}
+
+#playerPage-ratingBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#playerPage-rating {
+    margin: 0;
+    border: 3px solid black;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+}
+
+#playerPage-ratingBox h6 {
+    font-style: italic;
+    text-align: center;
+}

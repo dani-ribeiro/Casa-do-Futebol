@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/team.css';
 
-import SmallMatch from './SmallMatch';
-import Player from './Player';
+import SmallMatch from './SmallMatch.js';
+import Player from './Player.js';
+
+import LoadImage from './LoadImage.js';
 
 // Bootstrap Components -------------------------------------------------------
 import Container from 'react-bootstrap/Container';
@@ -27,7 +29,6 @@ function Team( {setCurrentView, teamData} ) {
                     throw new Error("ERROR: Failed to fetch team information");
                 }
                 const data = await response.json();
-                setTeamContent(data);
 
                 // reformats formations such that maximum 3 formations per line
                 const formationsArray = data.formations.split(',');
@@ -46,6 +47,12 @@ function Team( {setCurrentView, teamData} ) {
                     lines.push(currentLine);
                 }
                 setFormationsLines(lines);
+            
+                // re-establishes logo URL (prevents CORB)
+                const imageURL = await fetchLogo(teamID);
+                data.teamLogo = imageURL;
+
+                setTeamContent(data);
             }catch (error){
                 console.error('ERROR: Failed to fetch team information', error);
             }
@@ -62,7 +69,16 @@ function Team( {setCurrentView, teamData} ) {
                     throw new Error('ERROR: Failed to fetch players');
                 }
                 const data = await response.json();
-                setPlayersList(data);
+                 // re-establishes player picture URL (prevents CORB)
+                const updatedPlayersList = await Promise.all(
+                    Object.values(data).map(async (player) => {
+                        const playerID = player.player_id;
+                        const playerPhotoURL = await fetchPlayerPicture(playerID);
+                        player.photo = playerPhotoURL;
+                        return player;
+                    })
+                );
+                setPlayersList(updatedPlayersList);
             }catch (error){
                 console.error("ERROR: Failed to fetch players", error);
             }
@@ -79,8 +95,36 @@ function Team( {setCurrentView, teamData} ) {
                     throw new Error('ERROR: Failed to fetch fixtures');
                 }
                 const data = await response.json();
-                setUpcomingMatches(Object.values(data.upcoming));
-                setPreviousMatches(Object.values(data.previous));
+
+                // re-establishes logo URL for each logo (prevents CORB)
+                const updatedUpcomingMatches = await Promise.all(
+                    Object.values(data.upcoming).map(async (match) => {
+                        const away_id = match.away_id;
+                        const away_logo = await fetchLogo(away_id);
+                        const home_id = match.home_id;
+                        const home_logo = await fetchLogo(home_id);
+
+                        match.away_logo = away_logo;
+                        match.home_logo = home_logo;
+                        return match;
+                    })
+                );
+
+                const updatedPreviousMatches = await Promise.all(
+                    Object.values(data.upcoming).map(async (match) => {
+                        const away_id = match.away_id;
+                        const away_logo = await fetchLogo(away_id);
+                        const home_id = match.home_id;
+                        const home_logo = await fetchLogo(home_id);
+                        
+                        match.away_logo = away_logo;
+                        match.home_logo = home_logo;
+                        return match;
+                    })
+                );
+
+                setUpcomingMatches(updatedUpcomingMatches);
+                setPreviousMatches(updatedPreviousMatches);
             }catch (error){
                 console.error("ERROR: Failed to fetch fixtures", error);
             }
@@ -89,23 +133,44 @@ function Team( {setCurrentView, teamData} ) {
         fetchFixtures();
     }, [leagueID, season, teamID]);
 
-    // for debugging
-    useEffect(() => {
-        console.log(teamContent);
-        console.log(playersList);
-        console.log("upcoming");
-        console.log(upcomingMatchesList);
-        console.log("previous");
-        console.log(previousMatchesList);
-    }, [teamContent, playersList, upcomingMatchesList, previousMatchesList]);
+    // re-establish team logo URL (prevents CORB)
+    async function fetchLogo(teamID){
+        try {
+            const response = await fetch(`/api/team-logo/${teamID}`);
+            if (!response.ok) {
+                console.error('ERROR: Unable to fetch team logo')
+            }
 
+            const imageData = await response.blob();
+            const imageURL = URL.createObjectURL(imageData);
+            return imageURL;
+        } catch (error) {
+            console.error("ERROR: Unable to fetch team logo", error);
+        }
+    };
+
+    // re-establish player picture URL (prevents CORB)
+    async function fetchPlayerPicture(playerID){
+        try {
+            const response = await fetch(`/api/player-picture/${playerID}`);
+            if (!response.ok) {
+                console.error('ERROR: Unable to fetch player picture')
+            }
+
+            const imageData = await response.blob();
+            const imageURL = URL.createObjectURL(imageData);
+            return imageURL;
+        } catch (error) {
+            console.error("ERROR: Unable to fetch player picture", error);
+        }
+    };
 
     return (
         <div id='teamPage'>
             <Container fluid id='team-background'>
                 <div id='teamPage-left'>
                     <div id='teamPage-basicHolder'>
-                        <img className='teamPage-teamLogo' src={teamContent.teamLogo} alt='Team Crest'/>
+                        <LoadImage className={'teamPage-teamLogo'} src={teamContent.teamLogo} alt={'Team Crest'}/>
                         <div id='teamPage-teamInfo'>
                             <div className='teamPage-team-information'>
                                 <h2 id='teamPage-teamName'>{teamContent.teamName}</h2>
@@ -203,8 +268,11 @@ function Team( {setCurrentView, teamData} ) {
                             {Object.values(playersList).map((player, index) => (
                                 <Player
                                     key={index}
-                                    name={Object.keys(playersList)[index]}
+                                    name={player.name}
                                     playerData={player}
+                                    season={season}
+                                    setCurrentView={setCurrentView}
+                                    teamLogo={teamContent.teamLogo}
                                 />
                             ))}
                         </div>
@@ -235,7 +303,6 @@ function Team( {setCurrentView, teamData} ) {
                             ))}
                         </div>
                     </div>
-
                 </div>
             </Container>
 
