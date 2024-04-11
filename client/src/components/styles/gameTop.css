@@ -1,0 +1,137 @@
+#gameTop {
+    display: flex;
+    width: 100vw;
+    height:calc(100% - 68px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#gameTop-contentHolder { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 85%;
+}
+
+
+#gameTop-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 20px 40px 0 40px;
+}
+
+#gameTop-top h5 {
+    font-style: italic;
+    text-align: left;
+    margin: 0;
+}
+
+#gameTop-mid {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#gameTop-midTop {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.gameTop-teamBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 50px;
+}
+
+.gameTop-teamLogo {
+    width: 250px;
+    height: 250px;
+}
+
+.gameTop-teamBox h2 {
+    margin: 0;
+    padding: 10px 0;
+    font-weight: bold;
+}
+
+#gameTop-gameScore {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.gameTop-score {
+    margin: 0;
+    font-style: italic;
+    font-weight: bold;
+    padding: 0 30px;
+}
+
+
+#gameTop-midBottom {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    width: 30%;
+}
+
+.gameTop-timeline {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    border-top: 2px solid black;
+}
+
+#gameTop-timeline-left {
+    border-right: 2px solid black;
+}
+
+.gameTop-timelineEvent {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.gameTop-timelineDescription {
+    margin: 0 0 0 10px;
+    font-style: italic;
+}
+
+.gameTop-timelineIcon {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.gameTop-timelineIcon p {
+    margin: 0;
+    font-weight: bold;
+    margin: 0 0 0 5px;
+}
+
+.gameTop-timelineIcon img {
+    width: 20px;
+}

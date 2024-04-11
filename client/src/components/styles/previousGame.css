@@ -1,4 +1,4 @@
-#gamePage {
+#previousGamePage {
     display: flex;
     width: 100vw;
     height:calc(100% - 68px);
@@ -8,17 +8,16 @@
     align-items: center;
 }
 
-#gamePage-contentHolder { 
+#previousGamePage-contentHolder { 
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 85%;
-    border: 1px solid gray;
+    width: 100%;
 }
 
 
-#gamePage-top {
+#previousGamePage-top {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -27,13 +26,13 @@
     padding: 20px 40px 0 40px;
 }
 
-#gamePage-top h5 {
+#previousGamePage-top h5 {
     font-style: italic;
     text-align: left;
     margin: 0;
 }
 
-#gamePage-mid {
+#previousGamePage-mid {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -41,7 +40,7 @@
     width: 100%;
 }
 
-#gamePage-midTop {
+#previousGamePage-midTop {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -49,7 +48,7 @@
     width: 100%;
 }
 
-.gamePage-teamBox {
+.previousGamePage-teamBox {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -57,25 +56,25 @@
     margin: 0 50px;
 }
 
-.gamePage-teamLogo {
+.previousGamePage-teamLogo {
     width: 250px;
     height: 250px;
 }
 
-.gamePage-teamBox h2 {
+.previousGamePage-teamBox h2 {
     margin: 0;
     padding: 10px 0;
     font-weight: bold;
 }
 
-#gamePage-gameScore {
+#previousGamePage-gameScore {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
 }
 
-.gamePage-score {
+.previousGamePage-score {
     margin: 0;
     font-style: italic;
     font-weight: bold;
@@ -83,7 +82,7 @@
 }
 
 
-#gamePage-midBottom {
+#previousGamePage-midBottom {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -91,7 +90,7 @@
     width: 30%;
 }
 
-.gamePage-timeline {
+.previousGamePage-timeline {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -102,11 +101,11 @@
     border-top: 2px solid black;
 }
 
-#gamePage-timeline-left {
+#previousGamePage-timeline-left {
     border-right: 2px solid black;
 }
 
-.gamePage-timelineEvent {
+.previousGamePage-timelineEvent {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -115,26 +114,46 @@
     margin-bottom: 10px;
 }
 
-.gamePage-timelineDescription {
+.previousGamePage-timelineDescription {
     margin: 0 0 0 10px;
     font-style: italic;
 }
 
-.gamePage-timelineIcon {
+.previousGamePage-timelineIcon {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
 }
 
-.gamePage-timelineIcon p {
+.previousGamePage-timelineIcon p {
     margin: 0;
     font-weight: bold;
     margin: 0 0 0 5px;
 }
 
-.gamePage-timelineIcon img {
+.previousGamePage-timelineIcon img {
     width: 20px;
 }
 
+#previousGamePage-bottom {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    width: 50%;
+    border-top: 2px solid black;
+}
 
+.previousGamePage-teamStats-logo {
+    width: 30px;
+}
+
+#previousGamePage-gameStats td {
+    text-align: center;
+    padding: 5px;
+}
+
+.previousGamePage-teamStats-middle {
+    font-style: italic;
+}

@@ -675,9 +675,10 @@ app.post('/backend/signup', async (req, res) => {
                         minute: '2-digit' 
                     });
 
-                    // FT = Full Time (match is over) --> Add it to previous matches
-                    if(match.fixture.status.short === 'FT'){
+                    const status = match.fixture.status.short;
 
+                    // FT = Full Time (match is over), PEN = Penalty (penalty shoot-out is over), AET = Added Extra Time (match is over) --> Add it to previous matches
+                    if(status === 'FT' || status === 'PEN' || status === 'AET'){
                         previous[match.fixture.id] = {
                                                         home_team:      match.teams.home.name,
                                                         home_id:        match.teams.home.id,
@@ -687,12 +688,12 @@ app.post('/backend/signup', async (req, res) => {
                                                         away_logo:      match.teams.away.logo,
                                                         date:           date,
                                                         time:           time,
-                                                        status:         match.fixture.status.short,
-                                                        home_score:     match.score.fulltime.home,
-                                                        away_score:     match.score.fulltime.away,
+                                                        status,
+                                                        home_score: status === 'FT' ? match.score.fulltime.home : (status === 'PEN' ? match.score.penalty.home : match.score.extratime.home),
+                                                        away_score: status === 'FT' ? match.score.fulltime.away : (status === 'PEN' ? match.score.penalty.away : match.score.extratime.away)
                                                     }
                         
-                    }else{  // otherwise the game either hasn't occured or is ongoing --> Add it to upcoming matches (without scores)
+                    }else if(status === 'NS' || status === 'TBD'){  // otherwise the game either hasn't occured or is ongoing --> Add it to upcoming matches (without scores)
                         upcoming[match.fixture.id] = {
                                                         home_team:      match.teams.home.name,
                                                         home_id:        match.teams.home.id,
@@ -702,7 +703,7 @@ app.post('/backend/signup', async (req, res) => {
                                                         away_logo:      match.teams.away.logo,
                                                         date:           date,
                                                         time:           time,
-                                                        status:         match.fixture.status.short,
+                                                        status
                                                     }
                     }
                 }
@@ -717,7 +718,7 @@ app.post('/backend/signup', async (req, res) => {
     });
 
     // fetches team logo
-    app.get('/api/team-logo/:teamId', async (req, res) => {
+    app.get('/api/team-logo/:teamId', cache('24 hours'), async (req, res) => {
         const { teamId } = req.params;
         try {
             const response = await fetch(`https://media.api-sports.io/football/teams/${teamId}.png`);
@@ -752,6 +753,128 @@ app.post('/backend/signup', async (req, res) => {
         } catch (error) {
             console.error('Error fetching team logo:', error);
         }
+    });
+
+    // fetches previous match statistics for both teams
+    app.get('/api/matches/previous/stats/:matchID/:homeID/:awayID', cache('24 hours'), (req, res) => {
+        const { matchID, homeID, awayID } = req.params;
+        fetch(`https://v3.football.api-sports.io/fixtures/statistics?fixture=${matchID}`, options)
+        .then(response => {
+            if(!response.ok){
+                throw new Error("ERROR: Bad Response");
+            }else{
+                return response.json();
+            }
+        })
+        .then(data => {
+            // parse the response and send ONLY relevant data to client
+            const stats = data.response;
+            if(stats.length > 0){
+                const home = {};
+                const away = {};
+                /* home/away (string): Home/Away Team maps to     { team (string)            Team Name
+                                                                    id (int)                 Team's API ID
+
+                                                                    total_shots,
+                                                                    shots_on_target,
+                                                                    possession,
+                                                                    total_passes,
+                                                                    pass_accuracy,
+                                                                    fouls,
+                                                                    yellows,
+                                                                    reds,
+                                                                    offsides,
+                                                                    corners
+                                                                }
+                */
+
+                stats.forEach(teamStats => {
+                    if(teamStats.team.id === parseInt(homeID)){
+                        home.team = teamStats.team.name;
+                        home.id = teamStats.team.id;
+                        home.total_shots = teamStats.statistics[2].value || 0;
+                        home.shots_on_target = teamStats.statistics[0].value || 0;
+                        home.possession = teamStats.statistics[9].value || 0;
+                        home.total_passes = teamStats.statistics[13].value || 0;
+                        home.pass_accuracy = teamStats.statistics[15].value || 0;
+                        home.fouls = teamStats.statistics[6].value || 0;
+                        home.yellows = teamStats.statistics[10].value || 0;
+                        home.reds = teamStats.statistics[11].value || 0;
+                        home.offsides = teamStats.statistics[8].value || 0;
+                        home.corners = teamStats.statistics[7].value || 0;
+                    }else if(teamStats.team.id === parseInt(awayID)){
+                        away.team = teamStats.team.name;
+                        away.id = teamStats.team.id;
+                        away.total_shots = teamStats.statistics[2].value || 0;
+                        away.shots_on_target = teamStats.statistics[0].value || 0;
+                        away.possession = teamStats.statistics[9].value || 0;
+                        away.total_passes = teamStats.statistics[13].value || 0;
+                        away.pass_accuracy = teamStats.statistics[15].value || 0;
+                        away.fouls = teamStats.statistics[6].value || 0;
+                        away.yellows = teamStats.statistics[10].value || 0;
+                        away.reds = teamStats.statistics[11].value || 0;
+                        away.offsides = teamStats.statistics[8].value || 0;
+                        away.corners = teamStats.statistics[7].value || 0;
+                    }
+                });
+
+                res.json( { home, away } );
+            }else{
+                // data not available
+                res.json({});
+            }
+        })
+        .catch(error => console.error(error));
+    });
+
+    // fetches previous match events for both teams
+    app.get('/api/matches/previous/events/:matchID/:homeID/:awayID', cache('24 hours'), (req, res) => {
+        const { matchID, homeID, awayID } = req.params;
+        fetch(`https://v3.football.api-sports.io/fixtures/events?fixture=${matchID}`, options)
+        .then(response => {
+            if(!response.ok){
+                throw new Error("ERROR: Bad Response");
+            }else{
+                return response.json();
+            }
+        })
+        .then(data => {
+            // parse the response and send ONLY relevant data to client
+            const events = data.response;
+            if(events.length > 0){
+                const home = { events: []};
+                const away = { events: []};
+                
+                events.forEach(event => {
+                    // only display these events
+                    if( event.detail === 'Normal Goal' || event.detail === 'Own Goal' || event.detail === 'Penalty' || event.detail === 'Yellow Card' || event.detail === 'Red Card'){
+                        const eventData = {
+                            type:       event.type,
+                            detail:     event.detail,
+                            time: event.time.elapsed + (event.time.extra || 0),
+                            player: event.player.name,
+                        };
+                        if(event.team.id === parseInt(homeID)){
+                            home.team = teamStats.team.name;
+                            home.id = teamStats.team.id;
+                            home.events.push(eventData);
+                            
+
+                        }else if(event.team.id === parseInt(awayID)){
+                            away.team = teamStats.team.name;
+                            away.id = teamStats.team.id;
+                            away.events.push(eventData);
+                        }
+                    }
+                });
+
+                res.json( { home, away } );
+            }else{
+                // data not available
+                res.json({});
+            }
+        })
+        .catch(error => console.error(error));
     });
 
 mongoose.connect(`${process.env.DB_CONNECTION}`)

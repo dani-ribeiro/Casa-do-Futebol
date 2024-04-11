@@ -98,7 +98,7 @@ function Team( {setCurrentView, teamData} ) {
 
                 // re-establishes logo URL for each logo (prevents CORB)
                 const updatedUpcomingMatches = await Promise.all(
-                    Object.values(data.upcoming).map(async (match) => {
+                    Object.values(data.upcoming).map(async (match, index) => {
                         const away_id = match.away_id;
                         const away_logo = await fetchLogo(away_id);
                         const home_id = match.home_id;
@@ -106,12 +106,13 @@ function Team( {setCurrentView, teamData} ) {
 
                         match.away_logo = away_logo;
                         match.home_logo = home_logo;
+                        match.match_id = Object.keys(data.upcoming)[index];
                         return match;
                     })
                 );
 
                 const updatedPreviousMatches = await Promise.all(
-                    Object.values(data.upcoming).map(async (match) => {
+                    Object.values(data.previous).map(async (match, index) => {
                         const away_id = match.away_id;
                         const away_logo = await fetchLogo(away_id);
                         const home_id = match.home_id;
@@ -119,9 +120,20 @@ function Team( {setCurrentView, teamData} ) {
                         
                         match.away_logo = away_logo;
                         match.home_logo = home_logo;
+                        match.match_id = Object.keys(data.previous)[index];
                         return match;
                     })
                 );
+
+                // sort upcomingMatches in chronoloigcal order
+                updatedUpcomingMatches.sort((a, b) => {
+                    return new Date(a.date) - new Date(b.date);
+                });
+
+                // sort previousMatches in reverse-chronoloigcal order
+                updatedPreviousMatches.sort((a, b) => {
+                    return new Date(b.date) - new Date(a.date);
+                });
 
                 setUpcomingMatches(updatedUpcomingMatches);
                 setPreviousMatches(updatedPreviousMatches);
@@ -285,7 +297,6 @@ function Team( {setCurrentView, teamData} ) {
                             {upcomingMatchesList.map((match, index) => (
                                 <SmallMatch
                                     key={index}
-                                    matchID={Object.keys(upcomingMatchesList)[index]}
                                     matchData={match}
                                 />
                             ))}
@@ -297,8 +308,8 @@ function Team( {setCurrentView, teamData} ) {
                             {previousMatchesList.map((match, index) => (
                                 <SmallMatch
                                     key={index}
-                                    matchID={Object.keys(previousMatchesList)[index]}
                                     matchData={match}
+                                    setCurrentView={setCurrentView}
                                 />
                             ))}
                         </div>

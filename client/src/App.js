@@ -8,14 +8,14 @@ import Login from './components/Login.js';
 import LeagueStandings from './components/LeagueStandings.js';
 import Team from './components/Team.js';
 import PlayerPage from './components/PlayerPage.js';
-import Game from './components/Game.js';
+import PreviousGame from './components/PreviousGame.js';
 
 // Bootstrap Components -------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 
 function App() {
-  const [currentView, setCurrentView] = useState( {page: 'Game', data: null} );
+  const [currentView, setCurrentView] = useState( {page: 'League Standings', data: null} );
   const [loggedIn, setLoggedIn] = useState( {status: false, username: ''});
   const [showChangeModal, setShowChangeModal] = useState(false);
 
@@ -37,7 +37,7 @@ function App() {
           currentView.page === 'Log In' ? ( <Login setCurrentView={setCurrentView} setLoggedIn={setLoggedIn} />):
           currentView.page === 'Team' ? (<Team setCurrentView={setCurrentView} teamData={currentView.data} />):
           currentView.page === 'Player' ? (<PlayerPage setCurrentView={setCurrentView} playerData={currentView.data.playerData} season={currentView.data.season} teamLogo={currentView.data.teamLogo} />):
-          currentView.page === 'Game' ? (<Game setCurrentView={setCurrentView} />)
+          currentView.page === 'Previous Game' ? (<PreviousGame setCurrentView={setCurrentView} matchData={currentView.data} />)
 
           
           : null
