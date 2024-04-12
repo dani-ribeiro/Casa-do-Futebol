@@ -17,7 +17,8 @@ function NavBarTOP({ setCurrentView, loggedIn, setLoggedIn, showChangeModal, set
 
     function signOut(){
         sessionStorage.removeItem('token');
-        setLoggedIn( { status: false, username: '' });
+        sessionStorage.removeItem('points');
+        setLoggedIn( { status: false, username: '', points: 0 });
     }
 
     return (

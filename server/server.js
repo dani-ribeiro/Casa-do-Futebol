@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const mongoose = require('mongoose');
 const Login = require('./models/login.model.js');
+const Bet = require('./models/bet.model.js');
 
 const express = require('express');
 const app = express();
@@ -12,6 +13,8 @@ const cache = apicache.middleware;
 
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+
+const cron = require('node-cron');
 
 const jwt = require('jsonwebtoken');
 
@@ -29,6 +32,58 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     next();
   });
+
+//  routinely updates Bets database every hour to award points to users
+// every hour
+cron.schedule('0 * * * *', async () => {
+// every 10 seconds
+// cron.schedule('*/10 * * * * *', async () => {
+    try {
+        const betsInProgress = await Bet.find( { status: 'In Progress' } );
+
+        for(const bet of betsInProgress){
+            const matchID = bet.match_id;
+
+            fetch(`https://v3.football.api-sports.io/fixtures?id=${matchID}`, options)
+            .then(response => {
+                if(!response.ok){
+                    throw new Error("ERROR: Bad Response");
+                }else{
+                    return response.json();
+                }
+            })
+            .then(async data => {
+                const matchData = data.response[0];
+
+                const matchStatus = matchData.fixture.status.short;
+
+                if(matchStatus === 'FT' || matchStatus === 'AET' || matchStatus === 'PEN'){
+                    let match_winner = 'Draw';
+                    if(matchData.teams.home.winner){
+                        match_winner = matchData.teams.home.name;
+                    }else if(matchData.teams.away.winner){
+                        match_winner = matchData.teams.away.name;
+                    }
+
+                    if(bet.bet_match_winner !== match_winner){
+                        bet.status = 'Lost';
+                    }else{
+                        bet.status = 'Won';
+                        bet.actual_payout = bet.potential_payout;
+                        await bet.save();
+
+                        // award points
+                        const user = await Login.findOne({ _id: bet.bettor_id });
+                        user.points += bet.potential_payout;
+                        await user.save();
+                    }
+                }
+            });
+        }
+    }catch(error){
+        console.error('ERROR: Routine Bets DB Update Failed.', error);
+    }
+});
 
 app.get('/api/standings/:leagueID/:seasonYEAR', cache('24 hours'), (req, res) => {
     const { leagueID, seasonYEAR } = req.params;
@@ -114,7 +169,7 @@ app.post('/backend/signup', async (req, res) => {
                 const hashedPassword = await bcrypt.hash(password, saltRounds);
                 Login.create({ username, password: hashedPassword });
                 const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1d' });
-                res.json({ success: true, token });
+                res.json({ success: true, token, points: 1000});
             }
         }catch(error){ 
             res.json({ success: false, error: 'ERROR: DB Connection Failed' });
@@ -143,7 +198,7 @@ app.post('/backend/signup', async (req, res) => {
                 bcrypt.compare(password, existingUser.password, function(err, match) {
                     if(match){
                         const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1d' });
-                        res.json({ success: true, token });
+                        res.json({ success: true, token, points: existingUser.points });
                     }else{
                         res.json( {success: false, error: 'Incorrect'} );
                     }
@@ -990,6 +1045,49 @@ app.post('/backend/signup', async (req, res) => {
         })
         .catch(error => console.error(error));
     });
+
+    // places bet
+    app.post('/backend/placeBet', async (req, res) => {
+        try {
+            const { match_id, bettor, wagerAmount, totalPayout, status, match_date, bet_match_winner, odds_bet_match_winner, user_points } = req.body;
+
+            if(user_points < wagerAmount){
+                res.json( {success: false, error: 'You do not have the sufficient amount of points.'});
+                return;
+            }
+
+            if(wagerAmount >= 5 && totalPayout > 0){
+                const user = await Login.findOne({ username: bettor });
+                const userID = user._id;
+
+                const newBet = new Bet({
+                    match_id,
+                    bettor,
+                    bettor_id: userID,
+                    wager_amount: wagerAmount,
+                    potential_payout: totalPayout,
+                    status,
+                    match_date: new Date(match_date),
+                    bet_match_winner,
+                    odds_bet_match_winner
+                });
+
+                await newBet.save();
+
+                // subtract points
+                user.points -= wagerAmount;
+                await user.save();
+        
+                res.json( { success: true } );
+            }else{
+                res.json( {success: false, error: 'Wagers must be at least $5.00'});
+            }
+        }catch (error){
+            console.log(error);
+            res.json( {success: false, error: 'System Error: Failed to place bet'} );
+        }
+    });
+
 
 
 mongoose.connect(`${process.env.DB_CONNECTION}`)

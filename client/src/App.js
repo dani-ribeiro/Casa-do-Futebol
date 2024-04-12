@@ -18,7 +18,7 @@ import ShowBetModal from './components/ShowBetModal.js';
 
 function App() {
   const [currentView, setCurrentView] = useState( {page: 'League Standings', data: null} );
-  const [loggedIn, setLoggedIn] = useState( {status: false, username: ''});
+  const [loggedIn, setLoggedIn] = useState( {status: false, username: '', points: 0});
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [showBetModal, setShowBetModal] = useState( { show: false, data: null} );
 
@@ -26,10 +26,11 @@ function App() {
   useEffect(() => {
     const token = sessionStorage.getItem('token');
     const username = sessionStorage.getItem('username');
-    if (token) {
-        setLoggedIn({ status: true, username });
+    const points = parseFloat(sessionStorage.getItem('points'));
+    if(token){
+        setLoggedIn({ status: true, username, points});
     }
-}, []);
+}, [loggedIn.status, loggedIn.username, loggedIn.points]);
 
   return (
     <div className="App">
@@ -51,7 +52,7 @@ function App() {
         
 
       {loggedIn.status && <ShowChangeModal showChangeModal={showChangeModal} setShowChangeModal={setShowChangeModal} loggedIn={loggedIn} setLoggedIn={setLoggedIn}/>}
-      {showBetModal.show && <ShowBetModal showBetModal={showBetModal.show} matchData={showBetModal.data} setShowBetModal={setShowBetModal} loggedIn={loggedIn}/>}
+      {showBetModal.show && <ShowBetModal showBetModal={showBetModal.show} matchData={showBetModal.data} setShowBetModal={setShowBetModal} loggedIn={loggedIn} setLoggedIn={setLoggedIn}/>}
     </div>
   );
 }

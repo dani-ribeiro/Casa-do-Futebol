@@ -12,6 +12,12 @@ const LoginSchema = mongoose.Schema(
             type: String,
             required: true
         },
+
+        points: {
+            type: Number,
+            required: true,
+            default: 1000
+        },
     },
     {
         timestamps: true

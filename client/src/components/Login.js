@@ -31,7 +31,8 @@ function Login({ setCurrentView, setLoggedIn }) {
                 if(data.success){
                     sessionStorage.setItem('token', data.token);
                     sessionStorage.setItem('username', username);
-                    setLoggedIn( { status: true, username });
+                    sessionStorage.setItem('points', data.points);
+                    setLoggedIn( { status: true, username, points: data.points });
                     setCurrentView( {page: 'League Standings', data: null} );
                 }else if(data.error === 'Incorrect'){     // incorrect login details (or invalid characters) --> prompt user to try again
                     setLoginWarning('The username or password you entered is incorrect. Please try again.');
