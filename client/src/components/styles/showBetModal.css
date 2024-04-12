@@ -1,0 +1,104 @@
+#betModal {
+    display: flex;
+    flex-direction: column;
+}
+
+#betModal .modal-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#betModal #betModal-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 5px;
+    border-bottom: 2px solid gray;
+}
+
+#betModal-top .betModal-top-teams {
+    font-style: italic;
+}
+
+#betModal-top h5 {
+    margin: 0;
+}
+
+#betForm {
+    width: 100%;
+    text-align: center;
+}
+
+#betForm .betModal-oddsRow {
+    border-bottom: 1px solid gray;
+    height: 100px;
+}
+
+#betForm .betModal-odds-stat {
+    width: 30%;
+    font-style: italic;
+}
+
+#betForm .betModal-odds-odd {
+    width: 20%;
+    font-style: italic;
+}
+
+#betForm .betModal-odds-odd button {
+    width: 100%;
+    color: rgb(231, 229, 229);
+    font-weight: bold;
+}
+
+.betModal-odd-checked {
+    --bs-btn-bg: #0c3f90;
+    --bs-btn-active-bg: #1051b9;
+    --bs-btn-border-color: #0c3f90;
+    --bs-btn-hover-bg: #1051b9;
+}
+
+.betModal-odd-unchecked {
+    --bs-btn-bg: #454b50;
+    --bs-btn-active-bg: #656e76;
+    --bs-btn-border-color: #454b50;
+    --bs-btn-hover-bg: #656e76;
+    
+}
+
+#betForm .input-group {
+    height: 50px;
+    width: 60%;
+}
+
+#betForm .input-group-text {
+    background-color: #656e76;
+    color: rgb(231, 229, 229);
+}
+
+#betForm-submit {
+    --bs-btn-bg: #454b50;
+    --bs-btn-active-bg: #656e76;
+    --bs-btn-border-color: #454b50;
+    --bs-btn-hover-bg: #656e76;
+    font-weight: bold;
+    color: rgb(231, 229, 229);
+}
+
+#betForm-submit:disabled {
+    --bs-btn-disabled-opacity: 0.65;
+    --bs-btn-disabled-color: rgb(231, 229, 229);
+    --bs-btn-disabled-bg: #454b50;
+    --bs-btn-disabled-border-color: #454b50;
+}
+
+
+#betForm-submit p {
+    margin: 0;
+    font-style: italic;
+    font-weight: normal;
+}

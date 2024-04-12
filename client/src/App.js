@@ -9,6 +9,8 @@ import LeagueStandings from './components/LeagueStandings.js';
 import Team from './components/Team.js';
 import PlayerPage from './components/PlayerPage.js';
 import PreviousGame from './components/PreviousGame.js';
+import UpcomingGame from './components/UpcomingGame.js';
+import ShowBetModal from './components/ShowBetModal.js';
 
 // Bootstrap Components -------------------------------------------------------
 
@@ -18,6 +20,7 @@ function App() {
   const [currentView, setCurrentView] = useState( {page: 'League Standings', data: null} );
   const [loggedIn, setLoggedIn] = useState( {status: false, username: ''});
   const [showChangeModal, setShowChangeModal] = useState(false);
+  const [showBetModal, setShowBetModal] = useState( { show: false, data: null} );
 
   // checks if user is logged in (maintains log in after refresh)
   useEffect(() => {
@@ -37,7 +40,8 @@ function App() {
           currentView.page === 'Log In' ? ( <Login setCurrentView={setCurrentView} setLoggedIn={setLoggedIn} />):
           currentView.page === 'Team' ? (<Team setCurrentView={setCurrentView} teamData={currentView.data} />):
           currentView.page === 'Player' ? (<PlayerPage setCurrentView={setCurrentView} playerData={currentView.data.playerData} season={currentView.data.season} teamLogo={currentView.data.teamLogo} />):
-          currentView.page === 'Previous Game' ? (<PreviousGame setCurrentView={setCurrentView} matchData={currentView.data} />)
+          currentView.page === 'Previous Game' ? (<PreviousGame setCurrentView={setCurrentView} matchData={currentView.data} />):
+          currentView.page === 'Upcoming Game' ? (<UpcomingGame setCurrentView={setCurrentView} matchData={currentView.data} setShowBetModal={setShowBetModal} loggedIn={loggedIn} />)
 
           
           : null
@@ -47,6 +51,7 @@ function App() {
         
 
       {loggedIn.status && <ShowChangeModal showChangeModal={showChangeModal} setShowChangeModal={setShowChangeModal} loggedIn={loggedIn} setLoggedIn={setLoggedIn}/>}
+      {showBetModal.show && <ShowBetModal showBetModal={showBetModal.show} matchData={showBetModal.data} setShowBetModal={setShowBetModal} loggedIn={loggedIn}/>}
     </div>
   );
 }

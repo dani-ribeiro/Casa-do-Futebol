@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/smallMatch.css';
 import LoadImage from './LoadImage.js';
-// Bootstrap Components -------------------------------------------------------
 
-// ----------------------------------------------------------------------------
-
-function SmallMatch( {setCurrentView, matchData} ){
+function SmallMatch( {setCurrentView, matchData, gameType} ){
 
     function handleMatchClick(matchData){
-        setCurrentView( { page: 'Previous Game', data: matchData });
+        if(gameType === 'previous'){
+            setCurrentView( { page: 'Previous Game', data: matchData });
+        }else if(gameType === 'upcoming'){
+            setCurrentView( { page: 'Upcoming Game', data: matchData });
+        }
     }
 
     return (
@@ -21,9 +20,9 @@ function SmallMatch( {setCurrentView, matchData} ){
             </div>
             {matchData.status === 'FT' || matchData.status === 'PEN' || matchData.status === 'AET' ? (
                 <>
-                <div  className='small-match-home-score small-match-score'>
-                    <h4>{matchData.home_score}</h4>
-                </div>
+                    <div  className='small-match-home-score small-match-score'>
+                        <h4>{matchData.home_score}</h4>
+                    </div>
                 </>
             ): null}
             <div className='small-match-info'>
@@ -32,9 +31,9 @@ function SmallMatch( {setCurrentView, matchData} ){
             </div>
             {matchData.status === 'FT' || matchData.status === 'PEN' || matchData.status === 'AET' ? (
                 <>
-                <div  className='small-match-home-score small-match-score'>
-                    <h4>{matchData.away_score}</h4>
-                </div>
+                    <div  className='small-match-home-score small-match-score'>
+                        <h4>{matchData.away_score}</h4>
+                    </div>
                 </>
             ): null}
             <div className='small-match-team'>

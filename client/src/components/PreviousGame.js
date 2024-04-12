@@ -8,7 +8,7 @@ import LoadImage from "./LoadImage.js";
 import Table from 'react-bootstrap/Table';
 // ----------------------------------------------------------------------------
 
-function PreviousGame( {setCurrentView, matchData} ) {
+function PreviousGame( {matchData} ) {
     const [matchStats, setMatchStats] = useState({});
 
     useEffect(() => {
@@ -32,19 +32,19 @@ function PreviousGame( {setCurrentView, matchData} ) {
     return (
         <div id="previousGamePage">
             <div id='previousGamePage-contentHolder'>
-                <GameTop setCurrentView={setCurrentView} gameType={'Previous'} matchData={matchData}/>
+                <GameTop gameType={'Previous'} matchData={matchData}/>
                 <div id='previousGamePage-bottom'>
                     <Table id='previousGamePage-gameStats' borderless size='sm'>
                         <tbody>
                             <tr>
                                 <td className='previousGamePage-teamStats align-middle'>
-                                    <img src={matchData.home_logo} className='previousGamePage-teamStats-logo' alt='Home Team'></img>
+                                    <LoadImage src={matchData.home_logo} alt={'Home Crest'} className='previousGamePage-teamStats-logo'/>
                                 </td>
                                 <td className='previousGamePage-teamStats-middle align-middle'>
                                     TEAM STATS
                                 </td>
                                 <td className='previousGamePage-teamStats align-middle'>
-                                    <img src={matchData.away_logo} className='previousGamePage-teamStats-logo' alt='Away Team'></img>
+                                    <LoadImage src={matchData.away_logo} alt={'Away Crest'} className='previousGamePage-teamStats-logo'/>
                                 </td>
                             </tr>
                             <tr>

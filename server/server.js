@@ -842,8 +842,8 @@ app.post('/backend/signup', async (req, res) => {
             // parse the response and send ONLY relevant data to client
             const events = data.response;
             if(events.length > 0){
-                const home = { events: []};
-                const away = { events: []};
+                const home = [];
+                const away = [];
                 
                 events.forEach(event => {
                     // only display these events
@@ -852,21 +852,21 @@ app.post('/backend/signup', async (req, res) => {
                             type:       event.type,
                             detail:     event.detail,
                             time: event.time.elapsed + (event.time.extra || 0),
-                            player: event.player.name,
+                            player: event.player.name || ('Player'),
                         };
                         if(event.team.id === parseInt(homeID)){
-                            home.team = teamStats.team.name;
-                            home.id = teamStats.team.id;
-                            home.events.push(eventData);
+                            home.push(eventData);
                             
 
                         }else if(event.team.id === parseInt(awayID)){
-                            away.team = teamStats.team.name;
-                            away.id = teamStats.team.id;
-                            away.events.push(eventData);
+                            away.push(eventData);
                         }
                     }
                 });
+
+                // sort events in chronological order
+                home.sort((a, b) => a.time - b.time);
+                away.sort((a, b) => a.time - b.time);
 
                 res.json( { home, away } );
             }else{
@@ -876,6 +876,121 @@ app.post('/backend/signup', async (req, res) => {
         })
         .catch(error => console.error(error));
     });
+
+    // fetches previous match head to head encounters between 2 teams
+    app.get('/api/matches/h2h/:homeID/:awayID', cache('24 hours'), (req, res) => {
+        const { homeID, awayID } = req.params;
+        fetch(`https://v3.football.api-sports.io/fixtures/headtohead?h2h=${homeID}-${awayID}`, options)
+        .then(response => {
+            if(!response.ok){
+                throw new Error("ERROR: Bad Response");
+            }else{
+                return response.json();
+            }
+        })
+        .then(data => {
+            // parse the response and send ONLY relevant data to client
+            const matches = data.response;
+            if(matches.length > 0){
+                const h2h = [];
+
+                /* match_id (int): Match ID maps to     {   home_team (string)       Home Team
+                                                            home_id (int)            Home Team's API ID
+                                                            home_logo (URL)          Home Team's Logo
+
+                                                            away_team (string)       Away Team
+                                                            away_id (int)            Away Team's API ID
+                                                            away_logo (URL)          Away Team's Logo
+
+                                                            date (string)            Date of the match
+                                                            time (string)            Time of the match
+
+                                                            home_score (int)         Home Team's Goals (match finished)     
+                                                            away_score (int)         Away Team's Goals (match finished)
+                                                        }
+                */
+
+                for(const match of matches){
+                    const status = match.fixture.status.short;
+
+                    // FT = Full Time (match is over), PEN = Penalty (penalty shoot-out is over), AET = Added Extra Time (match is over) --> Add it to previous matches
+                    if(status === 'FT' || status === 'PEN' || status === 'AET'){
+                        // re-format date and time of the match
+                        const matchDate = new Date(match.fixture.date);
+                        const date = matchDate.toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
+                        });
+                        
+                        const time = matchDate.toLocaleTimeString('en-US', {
+                            hour: 'numeric', 
+                            minute: '2-digit' 
+                        });
+
+                        const head2head =  {
+                                                match_id:        match.fixture.id,
+                                                home_team:      match.teams.home.name,
+                                                home_id:        match.teams.home.id,
+                                                home_logo:      match.teams.home.logo,
+                                                away_team:      match.teams.away.name,
+                                                away_id:        match.teams.away.id,
+                                                away_logo:      match.teams.away.logo,
+                                                date:           date,
+                                                time:           time,
+                                                status,
+                                                home_score: status === 'FT' ? match.score.fulltime.home : (status === 'PEN' ? match.score.penalty.home : match.score.extratime.home),
+                                                away_score: status === 'FT' ? match.score.fulltime.away : (status === 'PEN' ? match.score.penalty.away : match.score.extratime.away)
+                                            }
+                        
+                        h2h.push(head2head);
+                        }
+                    }
+
+                // sort matches in reverse-chronological order
+                h2h.sort((a, b) => new Date(b.date) - new Date(a.date));
+                res.json(h2h);
+            }else{
+                // data not available
+                res.json({});
+            }
+        })
+        .catch(error => console.error(error));
+    });
+
+    // fetches pre-match odds for a fixture
+    app.get('/api/matches/odds/:matchID', cache('24 hours'), (req, res) => {
+        const { matchID } = req.params;
+        fetch(`https://v3.football.api-sports.io/odds?fixture=${matchID}&bookmaker=8`, options)
+        .then(response => {
+            if(!response.ok){
+                throw new Error("ERROR: Bad Response");
+            }else{
+                return response.json();
+            }
+        })
+        .then(data => {
+            // parse the response and send ONLY relevant data to client
+            if(data.response[0]){
+                const oddsData = data.response[0].bookmakers[0].bets;
+                
+                const odds =    {
+                                    matchWinnerOdds:    {
+                                                            home_win:   parseFloat(oddsData[0].values[0].odd) || 0,
+                                                            draw:       parseFloat(oddsData[0].values[1].odd) || 0,
+                                                            away_win:   parseFloat(oddsData[0].values[2].odd) || 0
+                                                        }
+                                };
+
+                res.json( {success: true, odds} );
+            }else{
+                // data not available
+                res.json( {success: false} );
+            }
+        })
+        .catch(error => console.error(error));
+    });
+
 
 mongoose.connect(`${process.env.DB_CONNECTION}`)
 .then(() => {

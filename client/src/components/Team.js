@@ -298,6 +298,8 @@ function Team( {setCurrentView, teamData} ) {
                                 <SmallMatch
                                     key={index}
                                     matchData={match}
+                                    setCurrentView={setCurrentView}
+                                    gameType={'upcoming'}
                                 />
                             ))}
                         </div>
@@ -310,6 +312,7 @@ function Team( {setCurrentView, teamData} ) {
                                     key={index}
                                     matchData={match}
                                     setCurrentView={setCurrentView}
+                                    gameType={'previous'}
                                 />
                             ))}
                         </div>

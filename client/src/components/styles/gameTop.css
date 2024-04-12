@@ -81,57 +81,10 @@
     padding: 0 30px;
 }
 
-
-#gameTop-midBottom {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
-    width: 30%;
-}
-
-.gameTop-timeline {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    padding: 15px;
-    border-top: 2px solid black;
-}
-
-#gameTop-timeline-left {
-    border-right: 2px solid black;
-}
-
-.gameTop-timelineEvent {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.gameTop-timelineDescription {
-    margin: 0 0 0 10px;
-    font-style: italic;
-}
-
-.gameTop-timelineIcon {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-}
-
-.gameTop-timelineIcon p {
-    margin: 0;
+#gameTop-gameScore .initializeBet {
+    --bs-btn-bg: #454b50;
+    --bs-btn-active-bg: #656e76;
+    --bs-btn-border-color: #454b50;
+    --bs-btn-hover-bg: #656e76;
     font-weight: bold;
-    margin: 0 0 0 5px;
-}
-
-.gameTop-timelineIcon img {
-    width: 20px;
 }

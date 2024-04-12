@@ -1,0 +1,78 @@
+#previousMatchEvent-midBottom {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    width: 45%;
+}
+
+#previousMatchEvent-border {
+    border-top: 2px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+}
+
+@keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .spin {
+    animation: rotate 5s linear infinite;
+  }
+
+.previousMatchEvent-timeline {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    border-top: 2px solid black;
+
+}
+
+.previousMatchEvent-timelineEvent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#previousMatchEvent-timeline-left .previousMatchEvent-timelineEvent {
+    justify-content: flex-start;
+}
+
+#previousMatchEvent-timeline-right .previousMatchEvent-timelineEvent {
+    justify-content: flex-end;
+}
+
+.previousMatchEvent-timelineDescription {
+    margin: 0 0 0 10px;
+    font-style: italic;
+}
+
+.previousMatchEvent-timelineIcon {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.previousMatchEvent-timelineIcon p {
+    margin: 0;
+    font-weight: bold;
+    margin: 0 0 0 5px;
+}
+
+.previousMatchEvent-timelineIcon img {
+    width: 20px;
+}
