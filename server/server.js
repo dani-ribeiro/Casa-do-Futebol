@@ -114,7 +114,7 @@ app.post('/backend/signup', async (req, res) => {
     }else{  // valid input --> check if username is available --> salt + hash password --> store user credentials in DB
         try{
             // checks if username already exists
-            const existingUser = await Login.findOne({ username });
+            const existingUser = await Login.findOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } });
             if(existingUser){
                 res.json({ success: false, username, error: 'Username Exists' });
                 return;

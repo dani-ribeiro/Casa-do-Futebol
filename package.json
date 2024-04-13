@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "concurrently \"npm run start-server\" \"npm run start-client\"",
+    "start": "concurrently \"npm run start-client\" \"npm run start-server\"",
     "start-server": "cd server && npm run start",
     "start-client": "cd client && npm run start"
   },
