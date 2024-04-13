@@ -33,7 +33,7 @@ function Login({ setCurrentView, setLoggedIn, socket }) {
                     sessionStorage.setItem('username', username);
                     sessionStorage.setItem('points', data.points);
                     sessionStorage.setItem('userID', data.userID);
-                    setLoggedIn( { status: true, username, points: data.points });
+                    setLoggedIn( { status: true, username, points: data.points, userID: data.userID });
                     socket.emit('login', data.userID);
                     setCurrentView( {page: 'League Standings', data: null} );
                 }else if(data.error === 'Incorrect'){     // incorrect login details (or invalid characters) --> prompt user to try again

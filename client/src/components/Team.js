@@ -274,20 +274,25 @@ function Team( {setCurrentView, teamData} ) {
                         </Table>
                     </div>
                     <div id='teamPage-playersSection'>
-                        <h2>Players</h2>
-                        <div id='teamPage-playersContainer'>
-                            {/* Player components */}
-                            {Object.values(playersList).map((player, index) => (
-                                <Player
-                                    key={index}
-                                    name={player.name}
-                                    playerData={player}
-                                    season={season}
-                                    setCurrentView={setCurrentView}
-                                    teamLogo={teamContent.teamLogo}
-                                />
-                            ))}
-                        </div>
+                        {/* API doesn't provide team squads for non-current seasons --> don't display players */}
+                        {season >= 2023 &&
+                        <>
+                            <h2>Players</h2>
+                            <div id='teamPage-playersContainer'>
+                                {/* Player components */}
+                                {Object.values(playersList).map((player, index) => (
+                                    <Player
+                                        key={index}
+                                        name={player.name}
+                                        playerData={player}
+                                        season={season}
+                                        setCurrentView={setCurrentView}
+                                        teamLogo={teamContent.teamLogo}
+                                    />
+                                ))}
+                            </div>
+                        </>
+                        }
                     </div>
                 </div>
                 <div id='teamPage-right'>

@@ -16,7 +16,8 @@ function NavBarTOP({ setCurrentView, loggedIn, setLoggedIn, showChangeModal, set
     function signOut(){
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('points');
-        setLoggedIn( { status: false, username: '', points: 0 });
+        sessionStorage.removeItem('userID');
+        setLoggedIn( { status: false, username: '', points: 0, userID: '' });
     }
 
     return (
@@ -28,7 +29,7 @@ function NavBarTOP({ setCurrentView, loggedIn, setLoggedIn, showChangeModal, set
                         <Navbar.Brand className='siteBrand' onClick={() => navigatePage('League Standings')}>Casa do Futebol</Navbar.Brand>
                     </div>
                     <Nav className="navRight">
-                        <Nav.Link>Leaderboard</Nav.Link>
+                        <Nav.Link onClick={() => setCurrentView( {page: 'Leaderboard', data: null} ) }>Leaderboard</Nav.Link>
                             {
                                 loggedIn.status ? (
                                     <>

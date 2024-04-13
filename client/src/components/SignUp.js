@@ -28,11 +28,13 @@ function SignUp({ setCurrentView, setLoggedIn, socket }) {
                 }
             })
             .then(data => {
+                console.log(data);
                 if(data.success){
                     sessionStorage.setItem('token', data.token);
                     sessionStorage.setItem('username', username);
                     sessionStorage.setItem('points', data.points);
-                    setLoggedIn( { status: true, username, points: data.points });
+                    sessionStorage.setItem('userID', data.userID);
+                    setLoggedIn( { status: true, username, points: data.points, userID: data.userID });
                     socket.emit('login', data.userID);
                     setCurrentView( {page: 'League Standings', data: null} );
                 }else if(data.error === 'Username Exists'){     // if username already exists --> return warning message and allow user to try again

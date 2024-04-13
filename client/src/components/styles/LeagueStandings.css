@@ -51,7 +51,7 @@
 }
 
 .table-responsive {
-    max-height: 370px;
+    max-height: 333px;
     overflow-y: auto;
 }
 
@@ -106,4 +106,30 @@
 
 .formLetter.draw {
     background-color: gray;
+}
+
+#leagueStandings-seasons {
+    --bs-btn-bg: #454b50;
+    --bs-btn-active-bg: #656e76;
+    --bs-btn-border-color: #454b50;
+    --bs-btn-hover-bg: #656e76;
+    --bs-btn-border-color: #454b50;
+    --bs-btn-hover-border-color: #656565;
+    font-weight: bold;
+}
+
+#leagueStandings-season-holder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-left: 5px;
+}
+
+.leagueStandingsPage .dropdown-menu.show{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
 }

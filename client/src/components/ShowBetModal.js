@@ -107,7 +107,8 @@ function ShowBetModal( { showBetModal, setShowBetModal, matchData, loggedIn, set
             match_date: matchData.date + ',' + matchData.time,
             bet_match_winner: isChecked.match_winner,
             odds_bet_match_winner: isChecked.match_winner_odds,
-            user_points: loggedIn.points
+            user_points: loggedIn.points,
+            match_description: `${matchData.home_team} x ${matchData.away_team}`
         };
     
         fetch('/backend/placeBet', {

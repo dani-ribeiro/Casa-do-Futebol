@@ -120,11 +120,12 @@ app.post('/backend/signup', async (req, res) => {
                 return;
             }else{  // username is valid & doesn't exist --> create account!
                 const hashedPassword = await bcrypt.hash(password, saltRounds);
-                Login.create({ username, password: hashedPassword });
+                const user = await Login.create({ username, password: hashedPassword });
                 const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1d' });
-                res.json({ success: true, token, points: 1000});
+                res.json({ success: true, token, points: 1000, userID: user._id  });
             }
         }catch(error){ 
+            console.log(error);
             res.json({ success: false, error: 'ERROR: DB Connection Failed' });
         };
     }
@@ -148,8 +149,21 @@ app.post('/backend/signup', async (req, res) => {
                 res.json({ success: false, error: 'Incorrect' });
                 return;
             }else{  //user exists --> verify password
-                bcrypt.compare(password, existingUser.password, function(err, match) {
+                bcrypt.compare(password, existingUser.password, async function(err, match) {
                     if(match){
+                        // give user 1000 extra points every 24 hours
+                        const lastDailyReward = new Date(existingUser.last_daily_reward);
+                        console.log(lastDailyReward);
+                        const currentDate = new Date();
+                        const diffInHours = (currentDate - lastDailyReward) / (1000 * 60 * 60);
+                        console.log(diffInHours);
+
+                        if(diffInHours >= 24){
+                            existingUser.points += 1000;
+                            existingUser.last_daily_reward = currentDate;
+                            await existingUser.save();
+                        }
+
                         const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1d' });
                         res.json({ success: true, token, points: existingUser.points, userID: existingUser._id  });
                     }else{
@@ -1002,7 +1016,7 @@ app.post('/backend/signup', async (req, res) => {
     // places bet
     app.post('/backend/placeBet', async (req, res) => {
         try {
-            const { match_id, bettor, wagerAmount, totalPayout, status, match_date, bet_match_winner, odds_bet_match_winner, user_points } = req.body;
+            const { match_id, match_description, bettor, wagerAmount, totalPayout, status, match_date, bet_match_winner, odds_bet_match_winner, user_points } = req.body;
 
             if(user_points < wagerAmount){
                 res.json( {success: false, error: 'You do not have the sufficient amount of points.'});
@@ -1022,7 +1036,8 @@ app.post('/backend/signup', async (req, res) => {
                     status,
                     match_date: new Date(match_date),
                     bet_match_winner,
-                    odds_bet_match_winner
+                    odds_bet_match_winner,
+                    match_description
                 });
 
                 await newBet.save();
@@ -1038,6 +1053,44 @@ app.post('/backend/signup', async (req, res) => {
         }catch (error){
             console.log(error);
             res.json( {success: false, error: 'System Error: Failed to place bet'} );
+        }
+    });
+
+    // fetches 5 of the users with the most points
+    app.get('/backend/leaderboard', async (req, res) => {
+        try{
+            const leaderboard = await Login.find().sort({ points: -1 }).limit(5);
+            res.json(leaderboard);
+        }catch(error){
+            console.error('Error fetching leaderboard:', error);
+        }
+    });
+
+    // fetches user's previous betting history
+    app.get('/backend/bets/:userID', async (req, res) => {
+        try{
+            const { userID } = req.params;
+            const bets = await Bet.find({ bettor_id: userID }).sort({match_date: -1});
+
+            // reformat date
+            const formattedBets = bets.map((bet) => {
+                const matchDate = new Date(bet.match_date);
+                const formattedDate = matchDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                return {
+                    ...bet.toObject(),
+                    match_date: formattedDate
+                };
+            });
+
+            formattedBets.sort((a,b) => b.match_date < a.match_date);
+    
+            res.json(formattedBets);
+        }catch(error){
+            console.error('Error fetching leaderboard:', error);
         }
     });
 
@@ -1098,7 +1151,6 @@ app.post('/backend/signup', async (req, res) => {
                                         await user.save();
                 
                                         // update points on client side
-                                        console.log('you won: ', user.points);
                                         io.to(user._id.toString()).emit('update_points', user.points);
                                     }
                                 }

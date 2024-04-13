@@ -11,6 +11,7 @@ import PlayerPage from './components/PlayerPage.js';
 import PreviousGame from './components/PreviousGame.js';
 import UpcomingGame from './components/UpcomingGame.js';
 import ShowBetModal from './components/ShowBetModal.js';
+import Leaderboard from './components/Leaderboard.js';
 import io from 'socket.io-client';
 const socket = io('http://localhost:3000');
 
@@ -29,8 +30,9 @@ function App() {
     const token = sessionStorage.getItem('token');
     const username = sessionStorage.getItem('username');
     const points = parseFloat(sessionStorage.getItem('points'));
+    const userID = sessionStorage.getItem('userID');
     if(token){
-        setLoggedIn({ status: true, username, points});
+        setLoggedIn({ status: true, username, points, userID});
     }
 }, [loggedIn.status, loggedIn.username, loggedIn.points]);
 
@@ -56,8 +58,8 @@ function App() {
           currentView.page === 'Team' ? (<Team setCurrentView={setCurrentView} teamData={currentView.data} />):
           currentView.page === 'Player' ? (<PlayerPage setCurrentView={setCurrentView} playerData={currentView.data.playerData} season={currentView.data.season} teamLogo={currentView.data.teamLogo} />):
           currentView.page === 'Previous Game' ? (<PreviousGame setCurrentView={setCurrentView} matchData={currentView.data} />):
-          currentView.page === 'Upcoming Game' ? (<UpcomingGame setCurrentView={setCurrentView} matchData={currentView.data} setShowBetModal={setShowBetModal} loggedIn={loggedIn} />)
-
+          currentView.page === 'Upcoming Game' ? (<UpcomingGame setCurrentView={setCurrentView} matchData={currentView.data} setShowBetModal={setShowBetModal} loggedIn={loggedIn} />):
+          currentView.page === 'Leaderboard' ? (<Leaderboard setCurrentView={setCurrentView} loggedIn={loggedIn}/>)
           
           : null
 

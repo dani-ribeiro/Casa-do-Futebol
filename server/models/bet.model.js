@@ -8,6 +8,11 @@ const BetSchema = mongoose.Schema(
             required: true
         },
 
+        match_description: {
+            type: String,
+            required: true
+        },
+
         bettor: {
             type: String,
             required: true,

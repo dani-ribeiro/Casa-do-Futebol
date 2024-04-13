@@ -5,12 +5,13 @@ import './styles/LeagueStandings.css';
 // Bootstrap Components -------------------------------------------------------
 import Container from 'react-bootstrap/Container';
 import Table from 'react-bootstrap/Table';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 // ----------------------------------------------------------------------------
 
 function LeagueStandings({setCurrentView}) {
-    const currentYear = new Date().getFullYear();
-
-    const [currentSeason, setCurrentSeason] = useState(currentYear); // default
+    const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+    const [currentSeason, setCurrentSeason] = useState(currentYear);
     const [activeTab, setActiveTab] = useState('Brasileirão');
     const [standings, setStandings] = useState({});
 
@@ -27,6 +28,10 @@ function LeagueStandings({setCurrentView}) {
     useEffect(() => {
         fetchStandings(leagues[activeTab].id, currentSeason);
     }, [currentSeason, activeTab, leagues]);
+
+    useEffect( () => {
+        setCurrentSeason(currentYear + leagues[activeTab].offset);
+    }, [currentYear, activeTab, leagues])
 
     function handleTabClick(leagueName) {
         setActiveTab(leagueName);
@@ -58,7 +63,29 @@ function LeagueStandings({setCurrentView}) {
         <div className="leagueStandingsPage">
             <Container fluid id='leagueStandings-background'>
                 <div id='leagueStandings'>
-                    <h3 id='standingText'>Standings</h3>
+                    <h3 id='standingText'>{currentSeason}-{currentSeason+1} League Standings</h3>
+                    <div id='leagueStandings-season-holder'>
+                        <DropdownButton
+                            id="leagueStandings-seasons" 
+                            title="Seasons" 
+                            drop={'end'}
+                        >
+                            <Dropdown.Item onClick={() => setCurrentYear(2011)}>2011</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2012)}>2012</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2013)}>2013</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2014)}>2014</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2015)}>2015</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2016)}>2016</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2017)}>2017</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2018)}>2018</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2019)}>2019</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2020)}>2020</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2021)}>2021</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2022)}>2022</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2023)}>2023</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setCurrentYear(2024)}>2024</Dropdown.Item>
+                        </DropdownButton>
+                    </div>
                     <div id='leagueHolder' className='flex justify-center'>
                         {/* handles selecting a league table */}
                         {Object.keys(leagues).map((leagueName, index) => (

@@ -2,9 +2,12 @@
   "scripts": {
     "start": "concurrently \"npm run start-client\" \"npm run start-server\"",
     "start-server": "cd server && npm run start",
-    "start-client": "cd client && npm run start"
+    "start-client": "cd client && npm run start",
+    "start-dev":  "concurrently \"npm run start-client\" \"npm run start-server-dev\"",
+    "start-server-dev": "cd server && npm run dev"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.0"
   }
 }

@@ -18,6 +18,11 @@ const LoginSchema = mongoose.Schema(
             required: true,
             default: 1000
         },
+
+        last_daily_reward: {
+            type: Date,
+            required: true,
+        }
     },
     {
         timestamps: true
