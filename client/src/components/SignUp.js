@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/signupLogin.css';
 
-function SignUp({ setCurrentView, setLoggedIn }) {
+function SignUp({ setCurrentView, setLoggedIn, socket }) {
     const [signUpWarning, setSignUpWarning] = useState('');
 
     // handles sign up form submission
@@ -33,6 +33,7 @@ function SignUp({ setCurrentView, setLoggedIn }) {
                     sessionStorage.setItem('username', username);
                     sessionStorage.setItem('points', data.points);
                     setLoggedIn( { status: true, username, points: data.points });
+                    socket.emit('login', data.userID);
                     setCurrentView( {page: 'League Standings', data: null} );
                 }else if(data.error === 'Username Exists'){     // if username already exists --> return warning message and allow user to try again
                     setSignUpWarning(`Username ${data.username} already exists. Please try again.`);

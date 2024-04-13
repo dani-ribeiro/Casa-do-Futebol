@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/signupLogin.css';
 
-function Login({ setCurrentView, setLoggedIn }) {
+function Login({ setCurrentView, setLoggedIn, socket }) {
     const [loginWarning, setLoginWarning] = useState('');
 
     // handles login form submission
@@ -32,7 +32,9 @@ function Login({ setCurrentView, setLoggedIn }) {
                     sessionStorage.setItem('token', data.token);
                     sessionStorage.setItem('username', username);
                     sessionStorage.setItem('points', data.points);
+                    sessionStorage.setItem('userID', data.userID);
                     setLoggedIn( { status: true, username, points: data.points });
+                    socket.emit('login', data.userID);
                     setCurrentView( {page: 'League Standings', data: null} );
                 }else if(data.error === 'Incorrect'){     // incorrect login details (or invalid characters) --> prompt user to try again
                     setLoginWarning('The username or password you entered is incorrect. Please try again.');

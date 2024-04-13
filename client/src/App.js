@@ -11,6 +11,8 @@ import PlayerPage from './components/PlayerPage.js';
 import PreviousGame from './components/PreviousGame.js';
 import UpcomingGame from './components/UpcomingGame.js';
 import ShowBetModal from './components/ShowBetModal.js';
+import io from 'socket.io-client';
+const socket = io('http://localhost:3000');
 
 // Bootstrap Components -------------------------------------------------------
 
@@ -32,13 +34,25 @@ function App() {
     }
 }, [loggedIn.status, loggedIn.username, loggedIn.points]);
 
+  useEffect(() => {
+    socket.on('update_points', function(points){
+      console.log('received: ', points);
+      points = parseFloat(points);
+      setLoggedIn((prevLoggedIn) => ({
+        ...prevLoggedIn,
+        points: points
+      }));
+      sessionStorage.setItem('points', points);
+    });
+  }, []);
+
   return (
     <div className="App">
         <NavBarTOP setCurrentView={setCurrentView} loggedIn={loggedIn} setLoggedIn={setLoggedIn} showChangeModal={showChangeModal} setShowChangeModal={setShowChangeModal}/>
         {/* Render Page View */}
         { currentView.page === 'League Standings' ? (<LeagueStandings setCurrentView={setCurrentView} />) : 
-          currentView.page === 'Sign Up' ? ( <SignUp setCurrentView={setCurrentView} setLoggedIn={setLoggedIn} />) :
-          currentView.page === 'Log In' ? ( <Login setCurrentView={setCurrentView} setLoggedIn={setLoggedIn} />):
+          currentView.page === 'Sign Up' ? ( <SignUp setCurrentView={setCurrentView} setLoggedIn={setLoggedIn} socket={socket} />) :
+          currentView.page === 'Log In' ? ( <Login setCurrentView={setCurrentView} setLoggedIn={setLoggedIn} socket={socket} />):
           currentView.page === 'Team' ? (<Team setCurrentView={setCurrentView} teamData={currentView.data} />):
           currentView.page === 'Player' ? (<PlayerPage setCurrentView={setCurrentView} playerData={currentView.data.playerData} season={currentView.data.season} teamLogo={currentView.data.teamLogo} />):
           currentView.page === 'Previous Game' ? (<PreviousGame setCurrentView={setCurrentView} matchData={currentView.data} />):

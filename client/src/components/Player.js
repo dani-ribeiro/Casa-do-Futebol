@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/player.css';
 import LoadImage from './LoadImage.js';

@@ -20,6 +20,11 @@ const jwt = require('jsonwebtoken');
 
 const PORT = 3456;
 
+const http = require('http');
+const socketIO = require('socket.io');
+const server = http.createServer(app);
+const io = socketIO(server);
+
 const options = {
     method: 'GET',
     headers: {
@@ -32,58 +37,6 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     next();
   });
-
-//  routinely updates Bets database every hour to award points to users
-// every hour
-cron.schedule('0 * * * *', async () => {
-// every 10 seconds
-// cron.schedule('*/10 * * * * *', async () => {
-    try {
-        const betsInProgress = await Bet.find( { status: 'In Progress' } );
-
-        for(const bet of betsInProgress){
-            const matchID = bet.match_id;
-
-            fetch(`https://v3.football.api-sports.io/fixtures?id=${matchID}`, options)
-            .then(response => {
-                if(!response.ok){
-                    throw new Error("ERROR: Bad Response");
-                }else{
-                    return response.json();
-                }
-            })
-            .then(async data => {
-                const matchData = data.response[0];
-
-                const matchStatus = matchData.fixture.status.short;
-
-                if(matchStatus === 'FT' || matchStatus === 'AET' || matchStatus === 'PEN'){
-                    let match_winner = 'Draw';
-                    if(matchData.teams.home.winner){
-                        match_winner = matchData.teams.home.name;
-                    }else if(matchData.teams.away.winner){
-                        match_winner = matchData.teams.away.name;
-                    }
-
-                    if(bet.bet_match_winner !== match_winner){
-                        bet.status = 'Lost';
-                    }else{
-                        bet.status = 'Won';
-                        bet.actual_payout = bet.potential_payout;
-                        await bet.save();
-
-                        // award points
-                        const user = await Login.findOne({ _id: bet.bettor_id });
-                        user.points += bet.potential_payout;
-                        await user.save();
-                    }
-                }
-            });
-        }
-    }catch(error){
-        console.error('ERROR: Routine Bets DB Update Failed.', error);
-    }
-});
 
 app.get('/api/standings/:leagueID/:seasonYEAR', cache('24 hours'), (req, res) => {
     const { leagueID, seasonYEAR } = req.params;
@@ -198,7 +151,7 @@ app.post('/backend/signup', async (req, res) => {
                 bcrypt.compare(password, existingUser.password, function(err, match) {
                     if(match){
                         const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1d' });
-                        res.json({ success: true, token, points: existingUser.points });
+                        res.json({ success: true, token, points: existingUser.points, userID: existingUser._id  });
                     }else{
                         res.json( {success: false, error: 'Incorrect'} );
                     }
@@ -1088,12 +1041,81 @@ app.post('/backend/signup', async (req, res) => {
         }
     });
 
+    io.on('connection', function(socket){
+        socket.on('login', (userID) => {
+          socket.join(userID.toString());
+        });
 
+            // debugging purposes:
+            // every minute
+            // cron.schedule('0 * * * * *', async () => {
+
+            //  routinely updates Bets database every hour to award points to users
+            // every hour
+            cron.schedule('0 * * * *', async () => {
+                try {
+                    const betsInProgress = await Bet.find( { status: 'In Progress' } );
+                    const todaysDate = new Date();
+            
+                    for(const bet of betsInProgress){
+                        const matchDate = new Date(bet.match_date);
+            
+                        // only update bets if the game is over
+                        if(todaysDate >= matchDate){
+                            const matchID = bet.match_id;
+                
+                            fetch(`https://v3.football.api-sports.io/fixtures?id=${matchID}`, options)
+                            .then(response => {
+                                if(!response.ok){
+                                    throw new Error("ERROR: Bad Response");
+                                }else{
+                                    return response.json();
+                                }
+                            })
+                            .then(async data => {
+                                const matchData = data.response[0];
+                
+                                const matchStatus = matchData.fixture.status.short;
+                
+                                if(matchStatus === 'FT' || matchStatus === 'AET' || matchStatus === 'PEN'){
+                                    let match_winner = 'Draw';
+                                    if(matchData.teams.home.winner){
+                                        match_winner = matchData.teams.home.name;
+                                    }else if(matchData.teams.away.winner){
+                                        match_winner = matchData.teams.away.name;
+                                    }
+                
+                                    if(bet.bet_match_winner !== match_winner){
+                                        bet.status = 'Lost';
+                                    }else{
+                                        bet.status = 'Won';
+                                        bet.actual_payout = bet.potential_payout;
+                                        await bet.save();
+                
+                                        // award points
+                                        const user = await Login.findOne({ _id: bet.bettor_id });
+                                        user.points += bet.potential_payout;
+                                        await user.save();
+                
+                                        // update points on client side
+                                        console.log('you won: ', user.points);
+                                        io.to(user._id.toString()).emit('update_points', user.points);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }catch(error){
+                    console.error('ERROR: Routine Bets DB Update Failed.', error);
+                }
+            });
+
+      });
 
 mongoose.connect(`${process.env.DB_CONNECTION}`)
 .then(() => {
     console.log('Connected to the database');
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`Server is running at http://localhost:${PORT}`);
     });
 });
