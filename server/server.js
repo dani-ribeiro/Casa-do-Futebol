@@ -1227,8 +1227,8 @@ app.post('/backend/signup', async (req, res) => {
           socket.join(userID.toString());
         });
 
-        //  routinely updates Bets database every 2 minutes to award points to users for correctly placed bets
-        cron.schedule('0 */2 * * * *', async () => {
+        //  routinely updates Bets database every 30 seconds to award points to users for correctly placed bets
+        cron.schedule('0 */30 * * * * *', async () => {
             try {
                 const betsInProgress = await Bet.find( { status: 'In Progress' } );
                 const todaysDate = new Date();
