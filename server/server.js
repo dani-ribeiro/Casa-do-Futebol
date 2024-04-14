@@ -38,7 +38,7 @@ app.use((req, res, next) => {
   });
 
 // fetches league standings for the provided league and season
-app.get('/api/standings/:leagueID/:seasonYEAR', cache('24 hours'), (req, res) => {
+app.get('/api/standings/:leagueID/:seasonYEAR', cache('1 hour'), (req, res) => {
     const { leagueID, seasonYEAR } = req.params;
     fetch(`https://v3.football.api-sports.io/standings?league=${leagueID}&season=${seasonYEAR}`, options)
     .then(response => {
@@ -209,7 +209,7 @@ app.post('/backend/signup', async (req, res) => {
     });
 
     // fetches team information
-    app.get('/api/team/:leagueID/:seasonYEAR/:teamID', cache('24 hours'), (req, res) => {
+    app.get('/api/team/:leagueID/:seasonYEAR/:teamID', cache('1 hour'), (req, res) => {
         const { leagueID, seasonYEAR, teamID } = req.params;
         fetch(`https://v3.football.api-sports.io/teams/statistics?league=${leagueID}&season=${seasonYEAR}&team=${teamID}`, options)
         .then(response => {
@@ -328,7 +328,7 @@ app.post('/backend/signup', async (req, res) => {
     });
 
     // fetches basic player information from the provided team
-    app.get('/api/players/:leagueID/:seasonYEAR/:teamID', cache('24 hours'), (req, res) => {
+    app.get('/api/players/:leagueID/:seasonYEAR/:teamID', cache('1 hour'), (req, res) => {
         const { leagueID, seasonYEAR, teamID } = req.params;
         fetch(`https://v3.football.api-sports.io/players/squads?team=${teamID}`, options)
         .then(response => {
@@ -374,7 +374,7 @@ app.post('/backend/signup', async (req, res) => {
     });
 
     // fetches advanced player information about the provided player
-    app.get('/api/player/:playerID/:seasonYEAR', cache('24 hours'), (req, res) => {
+    app.get('/api/player/:playerID/:seasonYEAR', cache('1 hour'), (req, res) => {
         const { playerID, seasonYEAR } = req.params;
 
         fetch(`https://v3.football.api-sports.io/players?id=${playerID}&season=${seasonYEAR}`, options)
@@ -775,7 +775,7 @@ app.post('/backend/signup', async (req, res) => {
     });
 
     // fetches player picture
-    app.get('/api/player-picture/:playerID', async (req, res) => {
+    app.get('/api/player-picture/:playerID', cache('24 hours'), async (req, res) => {
         const { playerID } = req.params;
         try {
             const response = await fetch(`https://media.api-sports.io/football/players/${playerID}.png`);
@@ -794,7 +794,7 @@ app.post('/backend/signup', async (req, res) => {
     });
 
     // fetches previous match statistics for both teams
-    app.get('/api/matches/previous/stats/:matchID/:homeID/:awayID', cache('24 hours'), (req, res) => {
+    app.get('/api/matches/previous/stats/:matchID/:homeID/:awayID', cache('1 hour'), (req, res) => {
         const { matchID, homeID, awayID } = req.params;
         fetch(`https://v3.football.api-sports.io/fixtures/statistics?fixture=${matchID}`, options)
         .then(response => {
@@ -866,7 +866,7 @@ app.post('/backend/signup', async (req, res) => {
     });
 
     // fetches previous match events for both teams
-    app.get('/api/matches/previous/events/:matchID/:homeID/:awayID', cache('24 hours'), (req, res) => {
+    app.get('/api/matches/previous/events/:matchID/:homeID/:awayID', cache('1 hour'), (req, res) => {
         const { matchID, homeID, awayID } = req.params;
         fetch(`https://v3.football.api-sports.io/fixtures/events?fixture=${matchID}`, options)
         .then(response => {
@@ -916,7 +916,7 @@ app.post('/backend/signup', async (req, res) => {
     });
 
     // fetches previous match head to head encounters between 2 teams
-    app.get('/api/matches/h2h/:homeID/:awayID', cache('24 hours'), (req, res) => {
+    app.get('/api/matches/h2h/:homeID/:awayID', cache('1 hour'), (req, res) => {
         const { homeID, awayID } = req.params;
         fetch(`https://v3.football.api-sports.io/fixtures/headtohead?h2h=${homeID}-${awayID}`, options)
         .then(response => {
@@ -997,7 +997,7 @@ app.post('/backend/signup', async (req, res) => {
     });
 
     // fetches pre-match odds for a fixture
-    app.get('/api/matches/odds/:matchID', cache('24 hours'), (req, res) => {
+    app.get('/api/matches/odds/:matchID', cache('1 hour'), (req, res) => {
         const { matchID } = req.params;
         fetch(`https://v3.football.api-sports.io/odds?fixture=${matchID}&bookmaker=8`, options)
         .then(response => {
