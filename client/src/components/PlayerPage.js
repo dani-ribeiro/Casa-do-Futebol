@@ -57,8 +57,12 @@ function PlayerPage( {playerData, season, teamLogo} ) {
                                     <p>{player?.team}</p>
                                 </div>
                                 <div id='playerPage-midInfo'>
-                                    <p className='playerPage-dot'>•</p>
-                                    <p id='playerPage-number'>#{playerData.number}</p>
+                                    {playerData.number && 
+                                        <>
+                                        <p className='playerPage-dot'>•</p>
+                                        <p id='playerPage-number'>#{playerData.number}</p>
+                                        </>
+                                    }
                                     <p className='playerPage-dot'>•</p>
                                     <p id='playerPage-position'>{player?.position}</p>
                                     {player?.captain &&

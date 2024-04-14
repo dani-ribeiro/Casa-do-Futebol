@@ -2,20 +2,25 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Login = require('./models/login.model.js');
 const Bet = require('./models/bet.model.js');
+
 const express = require('express');
 const app = express();
 app.use(express.json());
+
 const apicache = require('apicache');
 const cache = apicache.middleware;
+
 const bcrypt = require('bcrypt');
-const saltRounds = process.env.SALT_ROUNDS;
 const cron = require('node-cron');
 const jwt = require('jsonwebtoken');
-const PORT = process.env.PORT;
+
 const http = require('http');
 const socketIO = require('socket.io');
 const server = http.createServer(app);
 const io = socketIO(server);
+
+const saltRounds = Number(process.env.SALT_ROUNDS);
+const PORT = Number(process.env.PORT);
 
 // required to access the API
 const options = {
@@ -1213,7 +1218,6 @@ app.post('/backend/signup', async (req, res) => {
                 eventData.away = away;
             }
             res.json( {stats: statistics, events: eventData, other} );
-            console.log(stats);
         })
         .catch(error => console.error(error));
     });

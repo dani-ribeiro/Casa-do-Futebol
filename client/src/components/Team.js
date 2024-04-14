@@ -302,6 +302,7 @@ function Team( {setCurrentView, teamData} ) {
                                         playerData={player}
                                         season={season}
                                         teamLogo={teamContent.teamLogo}
+                                        setCurrentView={setCurrentView}
                                     />
                                 ))}
                             </div>

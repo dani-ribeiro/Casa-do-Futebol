@@ -11,7 +11,11 @@ import Form from 'react-bootstrap/Form';
 function ShowChangeModal( { showChangeModal, setShowChangeModal, loggedIn, setLoggedIn } ){
     const [editUsernameWarning, setEditUsernameWarning] = useState('');
 
-    const handleClose = () => setShowChangeModal(false);
+    // handles username change modal close
+    function handleClose(){
+        setShowChangeModal(false);
+        setEditUsernameWarning('');
+    }
 
     // edits username
     function editUsername(event){
@@ -52,7 +56,7 @@ function ShowChangeModal( { showChangeModal, setShowChangeModal, loggedIn, setLo
     }
 
     return (
-        <Modal show={showChangeModal} onHide={handleClose} animation={'fade'} centered>
+        <Modal show={showChangeModal} onHide={() => handleClose()} animation={'fade'} centered>
             <Modal.Header id='editUsername-modal'>
                 {/* <!-- warning --> */}
                 {editUsernameWarning && (

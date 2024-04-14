@@ -18,9 +18,9 @@ function LeagueStandings({setCurrentView}) {
     const leagues = useMemo(() => ({
         'Brasileirão': { id: 71, offset: 0 },
         'Bundesliga': { id: 78, offset: -1 },
-        'EPL': { id: 39, offset: -1 },
         'La Liga': { id: 140, offset: -1 },
         'Ligue 1': { id: 61, offset: -1 },
+        'Premier League': { id: 39, offset: -1 },
         'Serie A': { id: 135, offset: -1 }
     }), []);
     

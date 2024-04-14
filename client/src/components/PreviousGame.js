@@ -38,13 +38,13 @@ function PreviousGame( {matchData} ) {
                         <tbody>
                             <tr>
                                 <td className='previousGamePage-teamStats align-middle'>
-                                    <LoadImage src={matchData.home_logo} alt={'Home Crest'} className='previousGamePage-teamStats-logo'/>
+                                    <LoadImage src={matchData.home_logo} alt={'Home Crest'} className='previousGamePage-teamStats-logo' id={''}/>
                                 </td>
                                 <td className='previousGamePage-teamStats-middle align-middle'>
                                     TEAM STATS
                                 </td>
                                 <td className='previousGamePage-teamStats align-middle'>
-                                    <LoadImage src={matchData.away_logo} alt={'Away Crest'} className='previousGamePage-teamStats-logo'/>
+                                    <LoadImage src={matchData.away_logo} alt={'Away Crest'} className='previousGamePage-teamStats-logo' id={''}/>
                                 </td>
                             </tr>
                             <tr>

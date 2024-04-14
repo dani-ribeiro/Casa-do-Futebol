@@ -139,8 +139,13 @@ function ShowBetModal( { showBetModal, setShowBetModal, matchData, loggedIn, set
         });
     }
 
+    // handles bet modal close
+    function handleClose(){
+        setShowBetModal( {show: false, data: null} );
+        setBetWarning('');
+    }
     return (
-        <Modal show={showBetModal} onHide={() => setShowBetModal( {show: false, data: null} )} animation={'fade'} centered size='lg'>
+        <Modal show={showBetModal} onHide={() =>  handleClose()} animation={'fade'} centered size='lg'>
             <Modal.Header id='betModal'>
                 {/* <!-- warning --> */}
                 {betWarning && (
@@ -207,7 +212,7 @@ function ShowBetModal( { showBetModal, setShowBetModal, matchData, loggedIn, set
                         </Table>
                         <InputGroup className="mt-3 mb-3 mx-auto">
                             <InputGroup.Text>Wager Amount</InputGroup.Text>
-                            <Form.Control type={'number'}  min={5} max={loggedIn.points} onChange={(e) => setWagerAmount(Math.max(0, e.target.value))} required/>
+                            <Form.Control id='wagerAmount' name={wagerAmount} type={'number'}  min={5} max={loggedIn.points} onChange={(e) => setWagerAmount(Math.max(0, e.target.value))} required/>
                         </InputGroup>
                         <Button id='betForm-submit' type='submit' onClick={(submit) => submitBet(submit)} disabled={disableBet}>
                             Place Bet
