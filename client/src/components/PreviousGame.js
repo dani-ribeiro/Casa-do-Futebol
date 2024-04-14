@@ -3,7 +3,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/previousGame.css';
 import GameTop from './GameTop.js';
 import LoadImage from "./LoadImage.js";
-
 // Bootstrap Components -------------------------------------------------------
 import Table from 'react-bootstrap/Table';
 // ----------------------------------------------------------------------------
@@ -11,6 +10,7 @@ import Table from 'react-bootstrap/Table';
 function PreviousGame( {matchData} ) {
     const [matchStats, setMatchStats] = useState({});
 
+    // fetches previous match statistics
     useEffect(() => {
         const fetchMatchStats = async () => {
             try {
@@ -104,6 +104,5 @@ function PreviousGame( {matchData} ) {
         </div>
     );
   }
-
 
 export default PreviousGame;

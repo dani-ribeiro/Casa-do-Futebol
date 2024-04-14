@@ -7,12 +7,14 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 // ----------------------------------------------------------------------------
 
-function NavBarTOP({ setCurrentView, loggedIn, setLoggedIn, showChangeModal, setShowChangeModal }) {
+function NavBarTOP({ setCurrentView, loggedIn, setLoggedIn, setShowChangeModal }) {
 
+    // navigates to different page (login, sign up, change username)
     const navigatePage = (page) => {
         setCurrentView( {page, data: null});
     };
 
+    // sign out logic
     function signOut(){
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('points');
@@ -58,6 +60,5 @@ function NavBarTOP({ setCurrentView, loggedIn, setLoggedIn, showChangeModal, set
         </Container>
     );
   }
-
 
 export default NavBarTOP;

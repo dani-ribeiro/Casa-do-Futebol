@@ -3,13 +3,15 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/gameTop.css';
 import PreviousMatchEvents from './PreviousMatchEvents.js';
 import LoadImage from "./LoadImage.js";
+import OngoingMatchEvents from './OngoingMatchEvents.js';
 // Bootstrap Components -------------------------------------------------------
 import Button from 'react-bootstrap/Button';
 // ----------------------------------------------------------------------------
 
-function GameTop( {setCurrentView, setShowBetModal, loggedIn, gameType, matchData} ) {
+function GameTop( {setCurrentView, setShowBetModal, loggedIn, gameType, matchData, ongoingMatchEvents} ) {
     const [basicMatchData, setBasicMatchData] = useState({});
 
+    // converts match status to a nicer description
     useEffect(() => {
         let gameStatus;
         switch (matchData.status) {
@@ -25,6 +27,9 @@ function GameTop( {setCurrentView, setShowBetModal, loggedIn, gameType, matchDat
             case 'NS':
                 gameStatus = 'Not Started';
                 break;
+            case 'HT':
+                gameStatus = 'Half-time';
+                break;
             default:
                 gameStatus = 'N/A';
                 break;
@@ -34,8 +39,47 @@ function GameTop( {setCurrentView, setShowBetModal, loggedIn, gameType, matchDat
             status: gameStatus
         });
 
-    }, [matchData]);
+    }, [matchData, basicMatchData.time_elapsed, gameType]);
 
+    // if a match is ongoing, fetches game details every minute
+    useEffect(() => {
+        if(gameType === 'Ongoing'){
+            const fetchOngoingMatch = async () => {
+                if(matchData.status !== 'HT' && matchData.status !== 'FT'){
+                    try {
+                        const response = await fetch(`/api/matches/ongoing/${matchData.match_id}/${matchData.home_id}/${matchData.away_id}`);
+                        if (!response.ok) {
+                            throw new Error("ERROR: Failed to fetch ongoing match");
+                        }
+                        const data = await response.json();
+                        setBasicMatchData( {
+                            ...basicMatchData,
+                            status: `${data.other.time_elapsed}'`,
+                            home_score: data.other.home_goals,
+                            away_score: data.other.away_goals
+                        });
+                    }catch (error){
+                        console.error('ERROR: Failed to fetch ongoing match', error);
+                    }
+                }
+            };
+
+            fetchOngoingMatch();
+            // fetch ongoing game statistics every minute
+            const intervalID = setInterval(fetchOngoingMatch, 60000);
+
+            return () => clearInterval(intervalID);
+        }
+    }, [matchData, gameType, basicMatchData]);
+
+    // if the ongoing game finishes, redirect to league standings view
+    useEffect(() => {
+        if(gameType === 'Ongoing' && matchData.status === 'FT'){
+            setCurrentView( {page: 'League Standings', data: null });
+        }
+    }, [matchData.status, gameType, setCurrentView])
+
+    // if a user clicks on a head-to-head match, redirect them to the specific game's page
     function handleMatchClick(matchData){
         if(gameType === 'Head-to-Head'){
             setCurrentView( { page: 'Previous Game', data: matchData });
@@ -53,7 +97,7 @@ function GameTop( {setCurrentView, setShowBetModal, loggedIn, gameType, matchDat
         <div id='gameTop-contentHolder' onClick={() => handleMatchClick(matchData)}>
             <div id='gameTop-top'>
                 <h5>{basicMatchData.date}, {basicMatchData.time}</h5>
-                <h5>{basicMatchData.status}</h5>
+                <h5>{basicMatchData.status}</h5> 
             </div>
             <div id='gameTop-mid'>
                 <div id='gameTop-midTop'>
@@ -88,12 +132,14 @@ function GameTop( {setCurrentView, setShowBetModal, loggedIn, gameType, matchDat
                                                         away_id:    basicMatchData.away_id
                                                     }} 
                     />
-                    ): null
-                    }
+                    ):
+                gameType === 'Ongoing' ? (
+                    <OngoingMatchEvents matchEvents={ongoingMatchEvents} />
+                )
+                :null}
             </div>
         </div>
     );
   }
-
 
 export default GameTop;

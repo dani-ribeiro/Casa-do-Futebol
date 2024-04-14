@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/signupLogin.css';
 
@@ -15,6 +14,7 @@ function SignUp({ setCurrentView, setLoggedIn, socket }) {
     
         event.preventDefault(); // prevent default form refresh upon submission
     
+        // successfully creates an account or promptly displays error message
         fetch("/backend/signup", {
                 method: 'POST',
                 body: JSON.stringify(data),
@@ -29,13 +29,15 @@ function SignUp({ setCurrentView, setLoggedIn, socket }) {
             })
             .then(data => {
                 console.log(data);
-                if(data.success){
+                if(data.success){ // success! create an account
                     sessionStorage.setItem('token', data.token);
                     sessionStorage.setItem('username', username);
                     sessionStorage.setItem('points', data.points);
                     sessionStorage.setItem('userID', data.userID);
+
                     setLoggedIn( { status: true, username, points: data.points, userID: data.userID });
                     socket.emit('login', data.userID);
+
                     setCurrentView( {page: 'League Standings', data: null} );
                 }else if(data.error === 'Username Exists'){     // if username already exists --> return warning message and allow user to try again
                     setSignUpWarning(`Username ${data.username} already exists. Please try again.`);
@@ -62,7 +64,6 @@ function SignUp({ setCurrentView, setLoggedIn, socket }) {
                             </div>
                         )}
                         
-
                         {/* <!-- sign up form --> */}
                         <div className="login">
                             <h3>Sign Up</h3>
@@ -80,6 +81,5 @@ function SignUp({ setCurrentView, setLoggedIn, socket }) {
         </div>
     );
   }
-
 
 export default SignUp;

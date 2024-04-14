@@ -6,6 +6,7 @@ import GameTop from './GameTop.js';
 function UpcomingGame( {setCurrentView, setShowBetModal, loggedIn, matchData} ) {
     const [headToHeads, setHeadToHeads] = useState({});
 
+    // fetches all previous head-to-head encounters between the home and away team
     useEffect(() => {
         const fetchHeadToHeads = async () => {
             try {
@@ -38,6 +39,5 @@ function UpcomingGame( {setCurrentView, setShowBetModal, loggedIn, matchData} ) 
         </div>
     );
   }
-
 
 export default UpcomingGame;

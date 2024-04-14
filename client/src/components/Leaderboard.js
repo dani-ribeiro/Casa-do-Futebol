@@ -1,21 +1,17 @@
 import { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/leaderboard.css';
-
-import SmallMatch from './SmallMatch.js';
-import Player from './Player.js';
-
-import LoadImage from './LoadImage.js';
-
 // Bootstrap Components -------------------------------------------------------
 import Container from 'react-bootstrap/Container';
 import Table from 'react-bootstrap/Table';
 // ----------------------------------------------------------------------------
 
 function Leaderboard( {setCurrentView, loggedIn} ) {
+    const [points, setPoints] = useState(loggedIn.points);
     const [leaderboard, setLeaderboard] = useState([]);
     const [userBets, setUserBets] = useState([]);
 
+    // fetches top 5 users on the points leaderboard
     useEffect(() => {
         const fetchLeaderboard = async () => {
             try {
@@ -29,10 +25,10 @@ function Leaderboard( {setCurrentView, loggedIn} ) {
                 console.error('ERROR: Failed to fetch leaderboard', error);
             }
         };
-
         fetchLeaderboard();
     }, []);
 
+    // fetches logged in user's betting history
     useEffect(() => {
         const fetchBets = async () => {
             try {
@@ -51,6 +47,10 @@ function Leaderboard( {setCurrentView, loggedIn} ) {
             fetchBets();
         }
     }, [loggedIn.userID, loggedIn.status]);
+
+    useEffect(() => {
+        setPoints(loggedIn.points);
+    }, [loggedIn.points, points]);
 
     return (
         <div id='leaderboard-page'>
@@ -118,6 +118,5 @@ function Leaderboard( {setCurrentView, loggedIn} ) {
         </div>
     );
   }
-
 
 export default Leaderboard;

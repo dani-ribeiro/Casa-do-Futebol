@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/LeagueStandings.css';
 // Bootstrap Components -------------------------------------------------------
@@ -25,20 +24,24 @@ function LeagueStandings({setCurrentView}) {
         'Serie A': { id: 135, offset: -1 }
     }), []);
     
+    // fetches standings for the actively selected league and season
     useEffect(() => {
         fetchStandings(leagues[activeTab].id, currentSeason);
     }, [currentSeason, activeTab, leagues]);
 
+    // changes the season
     useEffect( () => {
         setCurrentSeason(currentYear + leagues[activeTab].offset);
     }, [currentYear, activeTab, leagues])
 
+    // handles changing league tables
     function handleTabClick(leagueName) {
         setActiveTab(leagueName);
         setCurrentSeason(currentYear + leagues[leagueName].offset);
         fetchStandings(leagues[leagueName].id, currentSeason);
     }
 
+    // displays team page if user clicks on a specific team
     function handleTeamClick(teamID){
         setCurrentView({ page: 'Team', data: {
                                                 leagueID: leagues[activeTab].id,
@@ -144,9 +147,6 @@ function LeagueStandings({setCurrentView}) {
                                                 </span>
                                             ))}
                                         </td>
-
-
-                                        {/* <td className='table-form'>{standings[teamName].form}</td> */}
                                     </tr>
                                 ))}
                             </tbody>
@@ -154,16 +154,8 @@ function LeagueStandings({setCurrentView}) {
                     </div>
                 </div>
             </Container>
-
-
-
-
-
-
-
         </div>
     );
   }
-
 
 export default LeagueStandings;

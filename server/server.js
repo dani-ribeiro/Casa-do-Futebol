@@ -1,30 +1,23 @@
 require('dotenv').config();
-
 const mongoose = require('mongoose');
 const Login = require('./models/login.model.js');
 const Bet = require('./models/bet.model.js');
-
 const express = require('express');
 const app = express();
 app.use(express.json());
-
 const apicache = require('apicache');
 const cache = apicache.middleware;
-
 const bcrypt = require('bcrypt');
-const saltRounds = 10;
-
+const saltRounds = process.env.SALT_ROUNDS;
 const cron = require('node-cron');
-
 const jwt = require('jsonwebtoken');
-
-const PORT = 3456;
-
+const PORT = process.env.PORT;
 const http = require('http');
 const socketIO = require('socket.io');
 const server = http.createServer(app);
 const io = socketIO(server);
 
+// required to access the API
 const options = {
     method: 'GET',
     headers: {
@@ -33,11 +26,13 @@ const options = {
     },
 };
 
+// prevents CORB
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     next();
   });
 
+// fetches league standings for the provided league and season
 app.get('/api/standings/:leagueID/:seasonYEAR', cache('24 hours'), (req, res) => {
     const { leagueID, seasonYEAR } = req.params;
     fetch(`https://v3.football.api-sports.io/standings?league=${leagueID}&season=${seasonYEAR}`, options)
@@ -97,7 +92,7 @@ app.get('/api/standings/:leagueID/:seasonYEAR', cache('24 hours'), (req, res) =>
     .catch(error => console.error(error));
 });
 
-// account sign up process
+// creates an account
 app.post('/backend/signup', async (req, res) => {
     const { username, password } = req.body;
 
@@ -131,7 +126,7 @@ app.post('/backend/signup', async (req, res) => {
     }
   });
 
-  // account login process
+  // logs in
   app.post('/backend/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -153,10 +148,8 @@ app.post('/backend/signup', async (req, res) => {
                     if(match){
                         // give user 1000 extra points every 24 hours
                         const lastDailyReward = new Date(existingUser.last_daily_reward);
-                        console.log(lastDailyReward);
                         const currentDate = new Date();
                         const diffInHours = (currentDate - lastDailyReward) / (1000 * 60 * 60);
-                        console.log(diffInHours);
 
                         if(diffInHours >= 24){
                             existingUser.points += 1000;
@@ -177,7 +170,7 @@ app.post('/backend/signup', async (req, res) => {
     }
   });
 
-    // edit username process
+    // edits username
     app.put('/backend/editUsername', async (req, res) => {
         const { currentUsername, username } = req.body;
 
@@ -329,7 +322,7 @@ app.post('/backend/signup', async (req, res) => {
         .catch(error => console.error(error));
     });
 
-    // fetches basic player information
+    // fetches basic player information from the provided team
     app.get('/api/players/:leagueID/:seasonYEAR/:teamID', cache('24 hours'), (req, res) => {
         const { leagueID, seasonYEAR, teamID } = req.params;
         fetch(`https://v3.football.api-sports.io/players/squads?team=${teamID}`, options)
@@ -375,7 +368,7 @@ app.post('/backend/signup', async (req, res) => {
         .catch(error => console.error(error));
     });
 
-    // fetches advanced player information
+    // fetches advanced player information about the provided player
     app.get('/api/player/:playerID/:seasonYEAR', cache('24 hours'), (req, res) => {
         const { playerID, seasonYEAR } = req.params;
 
@@ -647,8 +640,8 @@ app.post('/backend/signup', async (req, res) => {
         .catch(error => console.error(error));
     });
 
-    // fetches team matches and separates them into previous and upcoming matches
-    app.get('/api/fixtures/:season/:teamID', cache('24 hours'), (req, res) => {
+    // fetches team matches and separates them into previous, upcoming, and ongoing matches
+    app.get('/api/fixtures/:season/:teamID', cache('5 minutes'), (req, res) => {
         const { season, teamID } = req.params;
         fetch(`https://v3.football.api-sports.io/fixtures?season=${season}&team=${teamID}`, options)
         .then(response => {
@@ -664,6 +657,7 @@ app.post('/backend/signup', async (req, res) => {
             if(matches.length > 0){
                 const previous = {};
                 const upcoming = {};
+                const ongoing = {};
 
                 /* match_id (int): Match ID maps to     {   home_team (string)       Home Team
                                                             home_id (int)            Home Team's API ID
@@ -715,7 +709,7 @@ app.post('/backend/signup', async (req, res) => {
                                                         away_score: status === 'FT' ? match.score.fulltime.away : (status === 'PEN' ? match.score.penalty.away : match.score.extratime.away)
                                                     }
                         
-                    }else if(status === 'NS' || status === 'TBD'){  // otherwise the game either hasn't occured or is ongoing --> Add it to upcoming matches (without scores)
+                    }else if(status === 'NS'){  // game hasn't started --> Add it to upcoming matches (without scores)
                         upcoming[match.fixture.id] = {
                                                         home_team:      match.teams.home.name,
                                                         home_id:        match.teams.home.id,
@@ -727,10 +721,27 @@ app.post('/backend/signup', async (req, res) => {
                                                         time:           time,
                                                         status
                                                     }
+                    // game is live --> add to ongoing matches
+                    }else if(status === '1H' || status === 'HT' || status === '2H' || status === 'ET' || status === 'BT' || status === 'P'){
+
+                        ongoing[match.fixture.id] = {
+                            home_team:      match.teams.home.name,
+                            home_id:        match.teams.home.id,
+                            home_logo:      match.teams.home.logo,
+                            away_team:      match.teams.away.name,
+                            away_id:        match.teams.away.id,
+                            away_logo:      match.teams.away.logo,
+                            date:           date,
+                            time:           time,
+                            status,
+                            home_score: match.goals.home,
+                            away_score: match.goals.away,
+                            time_elapsed: match.fixture.status.elapsed
+                        }
                     }
                 }
 
-                res.json( { upcoming, previous } );
+                res.json( { upcoming, previous, ongoing } );
             }else{
                 // data not available
                 res.json({});
@@ -1094,74 +1105,181 @@ app.post('/backend/signup', async (req, res) => {
         }
     });
 
+    // fetch ongoing match details
+    app.get('/api/matches/ongoing/:matchID/:homeID/:awayID', cache('30 seconds'), (req, res) => {
+        const { matchID, homeID, awayID } = req.params;
+        fetch(`https://v3.football.api-sports.io/fixtures?id=${matchID}`, options)
+        .then(response => {
+            if(!response.ok){
+                throw new Error("ERROR: Bad Response");
+            }else{
+                return response.json();
+            }
+        })
+        .then(data => {
+            // parse the response and send ONLY relevant data to client
+
+            const other =   {
+                                time_elapsed:   data.response[0].fixture.status.elapsed,
+                                status:         data.response[0].fixture.status.short,
+                                home_goals:     data.response[0].goals.home,
+                                away_goals:     data.response[0].goals.away
+                            }
+
+            const stats = data.response[0].statistics;
+            const statistics = {};
+            if(stats.length > 0){
+                const home = {};
+                const away = {};
+                /* home/away (string): Home/Away Team maps to     { team (string)            Team Name
+                                                                    id (int)                 Team's API ID
+
+                                                                    total_shots,
+                                                                    shots_on_target,
+                                                                    possession,
+                                                                    total_passes,
+                                                                    pass_accuracy,
+                                                                    fouls,
+                                                                    yellows,
+                                                                    reds,
+                                                                    offsides,
+                                                                    corners
+                                                                }
+                */
+
+                stats.forEach(teamStats => {
+                    if(teamStats.team.id === parseInt(homeID)){
+                        home.team = teamStats.team.name;
+                        home.id = teamStats.team.id;
+                        home.total_shots = teamStats.statistics[2].value || 0;
+                        home.shots_on_target = teamStats.statistics[0].value || 0;
+                        home.possession = teamStats.statistics[9].value || 0;
+                        home.total_passes = teamStats.statistics[13].value || 0;
+                        home.pass_accuracy = teamStats.statistics[15].value || 0;
+                        home.fouls = teamStats.statistics[6].value || 0;
+                        home.yellows = teamStats.statistics[10].value || 0;
+                        home.reds = teamStats.statistics[11].value || 0;
+                        home.offsides = teamStats.statistics[8].value || 0;
+                        home.corners = teamStats.statistics[7].value || 0;
+                    }else if(teamStats.team.id === parseInt(awayID)){
+                        away.team = teamStats.team.name;
+                        away.id = teamStats.team.id;
+                        away.total_shots = teamStats.statistics[2].value || 0;
+                        away.shots_on_target = teamStats.statistics[0].value || 0;
+                        away.possession = teamStats.statistics[9].value || 0;
+                        away.total_passes = teamStats.statistics[13].value || 0;
+                        away.pass_accuracy = teamStats.statistics[15].value || 0;
+                        away.fouls = teamStats.statistics[6].value || 0;
+                        away.yellows = teamStats.statistics[10].value || 0;
+                        away.reds = teamStats.statistics[11].value || 0;
+                        away.offsides = teamStats.statistics[8].value || 0;
+                        away.corners = teamStats.statistics[7].value || 0;
+                    }
+                });
+
+                statistics.home = home;
+                statistics.away = away;
+            }
+            const events = data.response[0].events;
+            const eventData = {};
+            if(events.length > 0){
+                const home = [];
+                const away = [];
+                
+                events.forEach(event => {
+                    // only display these events
+                    if( event.detail === 'Normal Goal' || event.detail === 'Own Goal' || event.detail === 'Penalty' || event.detail === 'Yellow Card' || event.detail === 'Red Card'){
+                        const eventData = {
+                            type:       event.type,
+                            detail:     event.detail,
+                            time: event.time.elapsed + (event.time.extra || 0),
+                            player: event.player.name || ('Player'),
+                        };
+                        if(event.team.id === parseInt(homeID)){
+                            home.push(eventData);
+                            
+
+                        }else if(event.team.id === parseInt(awayID)){
+                            away.push(eventData);
+                        }
+                    }
+                });
+
+                // sort events in chronological order
+                home.sort((a, b) => a.time - b.time);
+                away.sort((a, b) => a.time - b.time);
+
+                eventData.home = home;
+                eventData.away = away;
+            }
+            res.json( {stats: statistics, events: eventData, other} );
+            console.log(stats);
+        })
+        .catch(error => console.error(error));
+    });
+
     io.on('connection', function(socket){
         socket.on('login', (userID) => {
           socket.join(userID.toString());
         });
 
-            // debugging purposes:
-            // every minute
-            // cron.schedule('0 * * * * *', async () => {
-
-            //  routinely updates Bets database every hour to award points to users
-            // every hour
-            cron.schedule('0 * * * *', async () => {
-                try {
-                    const betsInProgress = await Bet.find( { status: 'In Progress' } );
-                    const todaysDate = new Date();
+        //  routinely updates Bets database every 2 minutes to award points to users for correctly placed bets
+        cron.schedule('0 */2 * * * *', async () => {
+            try {
+                const betsInProgress = await Bet.find( { status: 'In Progress' } );
+                const todaysDate = new Date();
+        
+                for(const bet of betsInProgress){
+                    const matchDate = new Date(bet.match_date);
+        
+                    // only update bets if the game is over
+                    if(todaysDate >= matchDate){
+                        const matchID = bet.match_id;
             
-                    for(const bet of betsInProgress){
-                        const matchDate = new Date(bet.match_date);
+                        fetch(`https://v3.football.api-sports.io/fixtures?id=${matchID}`, options)
+                        .then(response => {
+                            if(!response.ok){
+                                throw new Error("ERROR: Bad Response");
+                            }else{
+                                return response.json();
+                            }
+                        })
+                        .then(async data => {
+                            const matchData = data.response[0];
             
-                        // only update bets if the game is over
-                        if(todaysDate >= matchDate){
-                            const matchID = bet.match_id;
-                
-                            fetch(`https://v3.football.api-sports.io/fixtures?id=${matchID}`, options)
-                            .then(response => {
-                                if(!response.ok){
-                                    throw new Error("ERROR: Bad Response");
+                            const matchStatus = matchData.fixture.status.short;
+            
+                            if(matchStatus === 'FT' || matchStatus === 'AET' || matchStatus === 'PEN'){
+                                let match_winner = 'Draw';
+                                if(matchData.teams.home.winner){
+                                    match_winner = matchData.teams.home.name;
+                                }else if(matchData.teams.away.winner){
+                                    match_winner = matchData.teams.away.name;
+                                }
+            
+                                if(bet.bet_match_winner !== match_winner){
+                                    bet.status = 'Lost';
                                 }else{
-                                    return response.json();
+                                    bet.status = 'Won';
+                                    bet.actual_payout = bet.potential_payout;
+                                    await bet.save();
+            
+                                    // award points
+                                    const user = await Login.findOne({ _id: bet.bettor_id });
+                                    user.points += bet.potential_payout;
+                                    await user.save();
+            
+                                    // update points on client side
+                                    io.to(user._id.toString()).emit('update_points', user.points);
                                 }
-                            })
-                            .then(async data => {
-                                const matchData = data.response[0];
-                
-                                const matchStatus = matchData.fixture.status.short;
-                
-                                if(matchStatus === 'FT' || matchStatus === 'AET' || matchStatus === 'PEN'){
-                                    let match_winner = 'Draw';
-                                    if(matchData.teams.home.winner){
-                                        match_winner = matchData.teams.home.name;
-                                    }else if(matchData.teams.away.winner){
-                                        match_winner = matchData.teams.away.name;
-                                    }
-                
-                                    if(bet.bet_match_winner !== match_winner){
-                                        bet.status = 'Lost';
-                                    }else{
-                                        bet.status = 'Won';
-                                        bet.actual_payout = bet.potential_payout;
-                                        await bet.save();
-                
-                                        // award points
-                                        const user = await Login.findOne({ _id: bet.bettor_id });
-                                        user.points += bet.potential_payout;
-                                        await user.save();
-                
-                                        // update points on client side
-                                        io.to(user._id.toString()).emit('update_points', user.points);
-                                    }
-                                }
-                            });
-                        }
+                            }
+                        });
                     }
-                }catch(error){
-                    console.error('ERROR: Routine Bets DB Update Failed.', error);
                 }
-            });
-
+            }catch(error){
+                console.error('ERROR: Routine Bets DB Update Failed.', error);
+            }
+        });
       });
 
 mongoose.connect(`${process.env.DB_CONNECTION}`)

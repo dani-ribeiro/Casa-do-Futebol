@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/showBetModal.css';
 // Bootstrap Components -------------------------------------------------------
@@ -8,8 +7,6 @@ import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
-
-
 
 function ShowBetModal( { showBetModal, setShowBetModal, matchData, loggedIn, setLoggedIn} ){
     const [betWarning, setBetWarning] = useState('');
@@ -33,7 +30,6 @@ function ShowBetModal( { showBetModal, setShowBetModal, matchData, loggedIn, set
     // Message from the API (https://www.api-football.com/documentation-v3#tag/Odds-(Pre-Match)/operation/get-odds)
     //  "We keep a 7-days history (The availability of odds may vary according to the leagues, seasons, fixtures and bookmakers)"
     useEffect(() => {
-
         const fetchOdds = async () => {
             try {
                 const response = await fetch(`/api/matches/odds/${matchData.match_id}`);
@@ -55,7 +51,7 @@ function ShowBetModal( { showBetModal, setShowBetModal, matchData, loggedIn, set
         fetchOdds();
     }, [matchData]);
 
-    // calculate total payout
+    // calculates total payout
     useEffect(() => {
         if(wagerAmount && isChecked.match_winner_odds !== null){
             const payout = parseFloat(wagerAmount) * isChecked.match_winner_odds;
@@ -95,6 +91,7 @@ function ShowBetModal( { showBetModal, setShowBetModal, matchData, loggedIn, set
         });
     }
 
+    // handles bet submission
     function submitBet(submit){
         submit.preventDefault();    // prevent default form submission
 

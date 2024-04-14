@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/playerPage.css';
 import LoadImage from "./LoadImage.js";
-
 // Bootstrap Components -------------------------------------------------------
 import Table from 'react-bootstrap/Table';
 // ----------------------------------------------------------------------------
 
-function PlayerPage( {setCurrentView, playerData, season, teamLogo} ) {
+function PlayerPage( {playerData, season, teamLogo} ) {
     const [player, setPlayer] = useState({});
 
+    // fetches player information
     useEffect(() => {
         const fetchPlayer = async () => {
             if(playerData.player_id && season){
@@ -50,7 +50,7 @@ function PlayerPage( {setCurrentView, playerData, season, teamLogo} ) {
                         <LoadImage src={playerData.photo} className={''} id={'playerPage-playerImage'} alt={'Salah'}/>
                         <div id='playerPage-playerMid'>
                             <h3 id='playerPage-firstName'>{player?.firstName}</h3>
-                            <h3 id='playerPage-lastName'>{player?.lastName}</h3> {/* bold */}
+                            <h3 id='playerPage-lastName'>{player?.lastName}</h3>
                             <div id='playerPage-smallInfo'>
                                 <div id='playerPage-team'>
                                     <LoadImage src={teamLogo} className={'playerPage-smallLogo'} id={''} alt={'Liverpool'}/>
@@ -165,7 +165,7 @@ function PlayerPage( {setCurrentView, playerData, season, teamLogo} ) {
                                     <h4>{playerData.position}</h4>
                                     <hr></hr>
                                 </div>
-                                {/* GENERAL STATISTICS */}
+                                {/* POSITIONAL STATISTICS */}
                                 <Table className='playerPage-statTable' borderless size='sm'>
                                     <tbody>
                                         {playerData.position === 'GOALKEEPER' ? 
@@ -292,6 +292,5 @@ function PlayerPage( {setCurrentView, playerData, season, teamLogo} ) {
         </div>
     );
   }
-
 
 export default PlayerPage;

@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/team.css';
-
 import SmallMatch from './SmallMatch.js';
 import Player from './Player.js';
-
 import LoadImage from './LoadImage.js';
-
 // Bootstrap Components -------------------------------------------------------
 import Container from 'react-bootstrap/Container';
 import Table from 'react-bootstrap/Table';
@@ -14,13 +11,14 @@ import Table from 'react-bootstrap/Table';
 
 function Team( {setCurrentView, teamData} ) {
     const { leagueID, season, teamID } = teamData;
-
     const [teamContent, setTeamContent] = useState({});
     const [formationsLines, setFormationsLines] = useState([]);
     const [playersList, setPlayersList] = useState([]);
     const [upcomingMatchesList, setUpcomingMatches] = useState([]);
     const [previousMatchesList, setPreviousMatches] = useState([]);
+    const [ongoingMatchesList, setOngoingMatches] = useState([]);
 
+    // fetches team information
     useEffect(() => {
         const fetchTeam = async () => {
             try {
@@ -61,6 +59,7 @@ function Team( {setCurrentView, teamData} ) {
         fetchTeam();
     }, [leagueID, season, teamID]);
 
+    // fetches players
     useEffect(() => {
         const fetchPlayers = async () => {
             try {
@@ -87,6 +86,7 @@ function Team( {setCurrentView, teamData} ) {
         fetchPlayers();
     }, [leagueID, season, teamID]);
 
+    // fetches all matches for the team
     useEffect(() => {
         const fetchFixtures = async () => {
             try {
@@ -125,18 +125,33 @@ function Team( {setCurrentView, teamData} ) {
                     })
                 );
 
-                // sort upcomingMatches in chronoloigcal order
+                const updatedOngoingMatches = await Promise.all(
+                    Object.values(data.ongoing).map(async (match, index) => {
+                        const away_id = match.away_id;
+                        const away_logo = await fetchLogo(away_id);
+                        const home_id = match.home_id;
+                        const home_logo = await fetchLogo(home_id);
+
+                        match.away_logo = away_logo;
+                        match.home_logo = home_logo;
+                        match.match_id = Object.keys(data.ongoing)[index];
+                        return match;
+                    })
+                );
+
+                // sorts upcoming matches in chronoloigcal order
                 updatedUpcomingMatches.sort((a, b) => {
                     return new Date(a.date) - new Date(b.date);
                 });
 
-                // sort previousMatches in reverse-chronoloigcal order
+                // sorts previous matches in reverse-chronoloigcal order
                 updatedPreviousMatches.sort((a, b) => {
                     return new Date(b.date) - new Date(a.date);
                 });
 
                 setUpcomingMatches(updatedUpcomingMatches);
                 setPreviousMatches(updatedPreviousMatches);
+                setOngoingMatches(updatedOngoingMatches);
             }catch (error){
                 console.error("ERROR: Failed to fetch fixtures", error);
             }
@@ -286,7 +301,6 @@ function Team( {setCurrentView, teamData} ) {
                                         name={player.name}
                                         playerData={player}
                                         season={season}
-                                        setCurrentView={setCurrentView}
                                         teamLogo={teamContent.teamLogo}
                                     />
                                 ))}
@@ -296,22 +310,39 @@ function Team( {setCurrentView, teamData} ) {
                     </div>
                 </div>
                 <div id='teamPage-right'>
-                    <div id='teamPage-upcomingMatches-section'>
-                        <h3 className='teamPage-matchesHeader'>Upcoming Matches</h3>
-                        <div id='teamPage-upcomingMatches'>
-                            {upcomingMatchesList.map((match, index) => (
-                                <SmallMatch
-                                    key={index}
-                                    matchData={match}
-                                    setCurrentView={setCurrentView}
-                                    gameType={'upcoming'}
-                                />
-                            ))}
+                    {season >= 2023 &&
+                        <div id='teamPage-ongoingMatches-section'>
+                            <h3 className='teamPage-matchesHeader'>Ongoing Matches</h3>
+                            <div className='teamPage-matches'>
+                                {ongoingMatchesList.map((match, index) => (
+                                    <SmallMatch
+                                        key={index}
+                                        matchData={match}
+                                        setCurrentView={setCurrentView}
+                                        gameType={'ongoing'}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    }
+                    {season >= 2023 &&
+                        <div id='teamPage-upcomingMatches-section'>
+                            <h3 className='teamPage-matchesHeader'>Upcoming Matches</h3>
+                            <div className='teamPage-matches'>
+                                {upcomingMatchesList.map((match, index) => (
+                                    <SmallMatch
+                                        key={index}
+                                        matchData={match}
+                                        setCurrentView={setCurrentView}
+                                        gameType={'upcoming'}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    }
                     <div id='teamPage-previousMatches-section'>
                         <h3 className='teamPage-matchesHeader'>Previous Matches</h3>
-                        <div id='teamPage-previousMatches'>
+                        <div className='teamPage-matches'>
                             {previousMatchesList.map((match, index) => (
                                 <SmallMatch
                                     key={index}
@@ -328,6 +359,5 @@ function Team( {setCurrentView, teamData} ) {
         </div>
     );
   }
-
 
 export default Team;

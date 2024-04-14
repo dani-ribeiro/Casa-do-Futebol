@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/signupLogin.css';
 
@@ -15,6 +14,7 @@ function Login({ setCurrentView, setLoggedIn, socket }) {
 
         event.preventDefault(); // prevent default form refresh upon submission
 
+        // logs in the user or promptly displays an error message
         fetch("/backend/login", {
                 method: 'POST',
                 body: JSON.stringify(data),
@@ -22,19 +22,21 @@ function Login({ setCurrentView, setLoggedIn, socket }) {
             })
             .then(response => {
                 if(!response.ok){
-                    // throw new Error("Unsuccessful sign up.");
+                    throw new Error("ERROR: Unsuccessful sign up.");
                 }else{
                     return response.json();
                 }
             })
             .then(data => {
-                if(data.success){
+                if(data.success){   // success! log in the user
                     sessionStorage.setItem('token', data.token);
                     sessionStorage.setItem('username', username);
                     sessionStorage.setItem('points', data.points);
                     sessionStorage.setItem('userID', data.userID);
+
                     setLoggedIn( { status: true, username, points: data.points, userID: data.userID });
                     socket.emit('login', data.userID);
+
                     setCurrentView( {page: 'League Standings', data: null} );
                 }else if(data.error === 'Incorrect'){     // incorrect login details (or invalid characters) --> prompt user to try again
                     setLoginWarning('The username or password you entered is incorrect. Please try again.');
@@ -61,7 +63,6 @@ function Login({ setCurrentView, setLoggedIn, socket }) {
                             </div>
                         )}
                         
-
                         {/* <!-- sign up form --> */}
                         <div className="login">
                             <h3>Login</h3>
@@ -79,6 +80,5 @@ function Login({ setCurrentView, setLoggedIn, socket }) {
         </div>
     );
   }
-
 
 export default Login;

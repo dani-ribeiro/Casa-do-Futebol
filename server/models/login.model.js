@@ -22,6 +22,7 @@ const LoginSchema = mongoose.Schema(
         last_daily_reward: {
             type: Date,
             required: true,
+            default: Date.now
         }
     },
     {

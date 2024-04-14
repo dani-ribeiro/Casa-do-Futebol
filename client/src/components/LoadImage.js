@@ -4,6 +4,7 @@ import Spinner from 'react-bootstrap/Spinner';
 function ImageWithLoading({ src, alt, className, id }) {
   const [loaded, setLoaded] = useState(false);
 
+  // load the real image when ready, otherwise display a spinner
   const handleLoad = () => {
     setLoaded(true);
   };

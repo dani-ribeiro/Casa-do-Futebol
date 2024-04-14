@@ -1,29 +1,7 @@
-import { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/previousMatchEvents.css';
 
-function PreviousMatchEvents( {matchData} ) {
-    const [matchEvents, setMatchEvents] = useState({});
-
-    // fetches previous match events
-    useEffect(() => {
-        const fetchMatchEvents = async () => {
-            try {
-                const response = await fetch(`/api/matches/previous/events/${matchData.match_id}/${matchData.home_id}/${matchData.away_id}`);
-                if (!response.ok) {
-                    throw new Error("ERROR: Failed to fetch match events");
-                }
-                const data = await response.json();
-                setMatchEvents(data);
-            }catch (error){
-                console.error('ERROR: Failed to fetch match events', error);
-            }
-        };
-
-        fetchMatchEvents();
-    }, [matchData]);
-
-
+function OngoingMatchEvents( {matchEvents} ) {
     return (
         <div id='previousMatchEvent-midBottom'>
             <div className='previousMatchEvent-timeline' id='previousMatchEvent-timeline-left'>
@@ -65,4 +43,5 @@ function PreviousMatchEvents( {matchData} ) {
     );
   }
 
-export default PreviousMatchEvents;
+
+export default OngoingMatchEvents;
