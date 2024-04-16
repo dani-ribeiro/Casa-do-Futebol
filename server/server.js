@@ -1228,7 +1228,7 @@ app.post('/backend/signup', async (req, res) => {
         });
 
         //  routinely updates Bets database every 30 seconds to award points to users for correctly placed bets
-        cron.schedule('0 */30 * * * * *', async () => {
+        cron.schedule('*/30 * * * * *', async () => {
             try {
                 const betsInProgress = await Bet.find( { status: 'In Progress' } );
                 const todaysDate = new Date();
@@ -1263,6 +1263,7 @@ app.post('/backend/signup', async (req, res) => {
             
                                 if(bet.bet_match_winner !== match_winner){
                                     bet.status = 'Lost';
+                                    await bet.save();
                                 }else{
                                     bet.status = 'Won';
                                     bet.actual_payout = bet.potential_payout;
